@@ -1,3 +1,16 @@
+##  Estructura del repositorio
+
+
+📦 DataVentor
+┣ 📂 backend
+┣ 📂 base de datos
+┣ 📂 documentos
+┣ 📂 Interfaz
+┣ 📄 .gitignore
+┣ 📄 README.md
+┣ 📄 package-lock.json
+┗ 📄 package.json
+
  DataVentor: Sistema de Gestión de Ambientes y Equipos
 
 *DataVentor* es un sistema de software desarrollado con el objetivo de mejorar la gestión de los equipos y ambientes dentro del SENA. Este proyecto surge como solución a un problema común en la institución: la falta de control centralizado del inventario tecnológico, lo que puede generar pérdidas de equipos, mala asignación de recursos o retrasos en el mantenimiento.
@@ -29,7 +42,7 @@ El sistema fue desarrollado a partir de historias de usuario, organizando sus fu
   Guarda un registro de los cambios de estado de los equipos, lo que permite hacer seguimiento y auditoría.
 
 ---
-
+```
 ## Modelo de Datos
 
 El sistema está basado en un modelo entidad-relación que incluye las siguientes entidades principales:
