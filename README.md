@@ -5,7 +5,7 @@
 ┣ 📂 backend
 ┣ 📂 base de datos
 ┣ 📂 documentos
-┣ 📂 Interfaz
+┣ 📂 Frontend
 ┣ 📄 .gitignore
 ┣ 📄 README.md
 ┣ 📄 package-lock.json
