@@ -1,6 +1,7 @@
-from modelos.usuario import Usuario    
+from modelos.usuario import Usuario
 
 class Instructor(Usuario):
 
+  
     def mostrar_tablero(self):
-        return "tablero de instructor"
+        return f"Tablero de Instructor: Bienvenido {self.get_nombre()}"
