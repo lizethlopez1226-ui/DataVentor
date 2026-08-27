@@ -73,7 +73,7 @@ function Login() {
         <section className="auth-left">
 
               <img src={loginImg} alt="Ilustración Login" />
-                <a href="https://storyset.com/people"></a>
+              <a href="https://storyset.com/tchnology">Technology illustrations by Storyset</a>
 
           <h2>DataVentor</h2>
 
