@@ -4,29 +4,27 @@ function DashboardTecnico() {
   return (
     <div className="dashboard-tecnico">
 
-      {/* BARRA SUPERIOR */}
+      {/* ENCABEZADO */}
       <header className="topbar">
-        <div className="logo">
-          DataVentor
-        </div>
+        <div className="logo">DataVentor</div>
 
         <div className="topbar-user">
-          👨‍🔧 Técnico
+          <span>👤</span>
+          <span>Técnico</span>
         </div>
       </header>
 
       {/* CONTENIDO */}
       <main className="dashboard-content">
 
-        {/* BIENVENIDA */}
-        <section className="welcome">
+        <div className="welcome">
           <h1>Bienvenido, Técnico</h1>
           <p>
-            Gestiona y realiza seguimiento a los reportes de los equipos.
+            Gestiona y atiende los reportes de novedades de los equipos.
           </p>
-        </section>
+        </div>
 
-        {/* TARJETAS */}
+        {/* TARJETAS DE ESTADO */}
         <section className="stats">
 
           <div className="stat-card">
@@ -42,7 +40,7 @@ function DashboardTecnico() {
 
           <div className="stat-card">
             <div className="stat-icon blue">
-              🔧
+              ⚙️
             </div>
 
             <div>
@@ -53,7 +51,7 @@ function DashboardTecnico() {
 
           <div className="stat-card">
             <div className="stat-icon green">
-              ✅
+              ✓
             </div>
 
             <div>
@@ -64,26 +62,21 @@ function DashboardTecnico() {
 
         </section>
 
-        {/* REPORTES PENDIENTES */}
+        {/* REPORTES */}
         <section className="reports-card">
 
           <div className="reports-header">
-
             <div>
               <h2>Reportes pendientes</h2>
-              <p>
-                Reportes que requieren atención del técnico.
-              </p>
+              <p>Reportes que requieren atención</p>
             </div>
 
             <button className="all-reports-btn">
               Ver todos
             </button>
-
           </div>
 
           <div className="table-container">
-
             <table>
 
               <thead>
@@ -100,17 +93,15 @@ function DashboardTecnico() {
               <tbody>
 
                 <tr>
-                  <td>001</td>
+                  <td>#001</td>
                   <td>PC-025</td>
                   <td>302</td>
-                  <td>25/08</td>
-
+                  <td>25/08/2026</td>
                   <td>
                     <span className="status pending">
                       Pendiente
                     </span>
                   </td>
-
                   <td>
                     <button className="view-btn">
                       Ver
@@ -119,17 +110,49 @@ function DashboardTecnico() {
                 </tr>
 
                 <tr>
-                  <td>002</td>
+                  <td>#002</td>
                   <td>PC-018</td>
                   <td>301</td>
-                  <td>25/08</td>
-
+                  <td>25/08/2026</td>
                   <td>
                     <span className="status pending">
                       Pendiente
                     </span>
                   </td>
+                  <td>
+                    <button className="view-btn">
+                      Ver
+                    </button>
+                  </td>
+                </tr>
 
+                <tr>
+                  <td>#003</td>
+                  <td>PC-010</td>
+                  <td>205</td>
+                  <td>24/08/2026</td>
+                  <td>
+                    <span className="status pending">
+                      Pendiente
+                    </span>
+                  </td>
+                  <td>
+                    <button className="view-btn">
+                      Ver
+                    </button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>#004</td>
+                  <td>PC-031</td>
+                  <td>204</td>
+                  <td>24/08/2026</td>
+                  <td>
+                    <span className="status pending">
+                      Pendiente
+                    </span>
+                  </td>
                   <td>
                     <button className="view-btn">
                       Ver
@@ -140,7 +163,6 @@ function DashboardTecnico() {
               </tbody>
 
             </table>
-
           </div>
 
         </section>
@@ -149,7 +171,7 @@ function DashboardTecnico() {
 
       {/* FOOTER */}
       <footer className="footer">
-        DataVentor © 2026
+        © 2026 DataVentor | SENA
       </footer>
 
     </div>
