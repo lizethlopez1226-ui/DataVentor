@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "./MisReportesTecnico.css";
+import { useNavigate } from "react-router-dom";
+import "../styles/MisReportesTecnico.css";
 
 interface Reporte {
   id: string;
@@ -11,6 +12,7 @@ interface Reporte {
 }
 
 const MisReportesTecnico: React.FC = () => {
+  const navigate = useNavigate();
   const [filtro, setFiltro] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
 
@@ -84,8 +86,7 @@ const MisReportesTecnico: React.FC = () => {
         <div className="header-left">
           <button
             className="btn-regresar"
-            onClick={() => window.history.back()}
-          >
+            onClick={() => navigate(-1)}          >
             ←
           </button>
 

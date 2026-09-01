@@ -1,10 +1,14 @@
 import "../styles/DashboardTecnico.css";
+import { useNavigate } from 'react-router-dom';
 
 function DashboardTecnico() {
+
+  const navigate = useNavigate();
+
   return (
     <div className="dashboard-tecnico">
 
-      {/* ENCABEZADO */}
+
       <header className="topbar">
         <div className="logo">DataVentor</div>
 
@@ -14,7 +18,7 @@ function DashboardTecnico() {
         </div>
       </header>
 
-      {/* CONTENIDO */}
+
       <main className="dashboard-content">
 
         <div className="welcome">
@@ -24,7 +28,7 @@ function DashboardTecnico() {
           </p>
         </div>
 
-        {/* TARJETAS DE ESTADO */}
+       
         <section className="stats">
 
           <div className="stat-card">
@@ -62,7 +66,7 @@ function DashboardTecnico() {
 
         </section>
 
-        {/* REPORTES */}
+     
         <section className="reports-card">
 
           <div className="reports-header">
@@ -71,8 +75,9 @@ function DashboardTecnico() {
               <p>Reportes que requieren atención</p>
             </div>
 
-            <button className="all-reports-btn">
-              Ver todos
+            <button className="all-reports-btn" 
+             onClick={() => navigate('/mis-reportes-tecnico')}>
+              Ver todos 
             </button>
           </div>
 
@@ -169,7 +174,7 @@ function DashboardTecnico() {
 
       </main>
 
-      {/* FOOTER */}
+
       <footer className="footer">
         © 2026 DataVentor | SENA
       </footer>

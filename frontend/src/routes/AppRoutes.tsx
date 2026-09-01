@@ -1,159 +1,37 @@
-import "../styles/DashboardTecnico.css";
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-function DashboardTecnico() {
+
+import Registro from '../pages/Registro';
+import DashboardAdmin from '../pages/DashboardAdmin';
+import DashboardAprendiz from '../pages/DashboardAprendiz';
+import DashboardTecnico from '../pages/DashboardTecnico';
+import CrearReporte from '../pages/CrearReporte';
+import MisReportesTecnico from '../pages/MisReportesTecnico';
+import Reportes from '../pages/Reportes';
+import Login from '../pages/Login';
+
+export default function AppRoutes() {
   return (
-    <div className="dashboard-tecnico">
+    <Routes>
+      {/* Ruta raíz redirige al login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* BARRA SUPERIOR */}
-      <header className="topbar">
-        <div className="logo">
-          DataVentor
-        </div>
+      {/* Autenticación */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/registro" element={<Registro />} />
 
-        <div className="topbar-user">
-          👨‍🔧 Técnico
-        </div>
-      </header>
+      {/* Dashboards */}
+      <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+      <Route path="/dashboard-aprendiz" element={<DashboardAprendiz />} />
+      <Route path="/dashboard-tecnico" element={<DashboardTecnico />} />
 
-      {/* CONTENIDO */}
-      <main className="dashboard-content">
+      {/* Reportes */}
+      <Route path="/crear-reporte" element={<CrearReporte />} />
+      <Route path="/mis-reportes-tecnico" element={<MisReportesTecnico />} />
+      <Route path="/reportes" element={<Reportes />} />
 
-        {/* BIENVENIDA */}
-        <section className="welcome">
-          <h1>Bienvenido, Técnico</h1>
-          <p>
-            Gestiona y realiza seguimiento a los reportes de los equipos.
-          </p>
-        </section>
-
-        {/* TARJETAS */}
-        <section className="stats">
-
-          <div className="stat-card">
-            <div className="stat-icon purple">
-              📋
-            </div>
-
-            <div>
-              <p>Pendientes</p>
-              <h2>12</h2>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon blue">
-              🔧
-            </div>
-
-            <div>
-              <p>En proceso</p>
-              <h2>5</h2>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon green">
-              ✅
-            </div>
-
-            <div>
-              <p>Resueltos</p>
-              <h2>28</h2>
-            </div>
-          </div>
-
-        </section>
-
-        {/* REPORTES PENDIENTES */}
-        <section className="reports-card">
-
-          <div className="reports-header">
-
-            <div>
-              <h2>Reportes pendientes</h2>
-              <p>
-                Reportes que requieren atención del técnico.
-              </p>
-            </div>
-
-            <button className="all-reports-btn">
-              Ver todos
-            </button>
-
-          </div>
-
-          <div className="table-container">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Equipo</th>
-                  <th>Ambiente</th>
-                  <th>Fecha</th>
-                  <th>Estado</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-
-              <tbody>
-
-                <tr>
-                  <td>001</td>
-                  <td>PC-025</td>
-                  <td>302</td>
-                  <td>25/08</td>
-
-                  <td>
-                    <span className="status pending">
-                      Pendiente
-                    </span>
-                  </td>
-
-                  <td>
-                    <button className="view-btn">
-                      Ver
-                    </button>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>002</td>
-                  <td>PC-018</td>
-                  <td>301</td>
-                  <td>25/08</td>
-
-                  <td>
-                    <span className="status pending">
-                      Pendiente
-                    </span>
-                  </td>
-
-                  <td>
-                    <button className="view-btn">
-                      Ver
-                    </button>
-                  </td>
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </section>
-
-      </main>
-
-      {/* FOOTER */}
-      <footer className="footer">
-        DataVentor © 2026
-      </footer>
-
-    </div>
+      {/* Redirección si la ruta no existe */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
-
-export default DashboardTecnico;
