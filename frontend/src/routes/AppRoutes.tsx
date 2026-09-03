@@ -79,16 +79,6 @@ export default function AppRoutes() {
       element={<Registro/>}
       />
 
-      <Route
-        path="/registrar-ambiente"
-        element={<RegistrarAmbiente />}
-      />
-
-      <Route
-        path="/registrar-equipo"
-        element={<RegistrarEquipo />}
-      />
-
 
     </Routes>
   );

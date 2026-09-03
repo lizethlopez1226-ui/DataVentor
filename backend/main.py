@@ -5,6 +5,7 @@ from backend.Rutas.equipos import equipos_bp
 from backend.Rutas.reportes_routes import reportes_bp
 from backend.Rutas.auth import auth_bp
 from backend.Rutas.usuarios import usuarios_bp
+from backend.Rutas.ambientes import ambientes_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -14,7 +15,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(equipos_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(usuarios_bp)
-
+app.register_blueprint(ambientes_bp)
 
 @app.route("/")
 def index():
