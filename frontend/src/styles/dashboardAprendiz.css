@@ -52,6 +52,10 @@ body{
 
 }
 
+.topbar h1 span {
+  color: #0cc96a;
+}
+
 .topbar nav a:hover{
     transform: translateY(-2px);
     color: #15ff00;
@@ -153,7 +157,7 @@ body{
     font-weight:bold;
     cursor: pointer;
 
-    background:#FF1607;
+    background:#0cc96a;
 }
 
 .reports{

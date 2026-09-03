@@ -1,37 +1,95 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import Login from "../pages/Login";
+import Registro from "../pages/Registro";
+import DashboardAdmin from "../pages/DashboardAdmin";
+import DashboardAprendiz from "../pages/DashboardAprendiz";
+import DashboardTecnico from "../pages/DashboardTecnico";
+import DashboardInstructor from "../pages/DashboardInstructor";
+import CrearReporte from "../pages/CrearReporte";
+import MisReportes from "../pages/MisReportes";
+import MisReportesTecnico from "../pages/MisReportesTecnico";
+import DetalleReporte from "../pages/DetalleReporte";
+import RegistrarEquipo from "../pages/RegistrarEquipo";
+import RegistrarAmbiente from "../pages/RegistrarAmbiente";
 
 
-import Registro from '../pages/Registro';
-import DashboardAdmin from '../pages/DashboardAdmin';
-import DashboardAprendiz from '../pages/DashboardAprendiz';
-import DashboardTecnico from '../pages/DashboardTecnico';
-import CrearReporte from '../pages/CrearReporte';
-import MisReportesTecnico from '../pages/MisReportesTecnico';
-import Reportes from '../pages/Reportes';
-import Login from '../pages/Login';
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Ruta raíz redirige al login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Autenticación */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/registro" element={<Registro />} />
+      <Route
+        path="/"
+        element={<Navigate to="/login" replace />}
+      />
 
-      {/* Dashboards */}
-      <Route path="/dashboard-admin" element={<DashboardAdmin />} />
-      <Route path="/dashboard-aprendiz" element={<DashboardAprendiz />} />
-      <Route path="/dashboard-tecnico" element={<DashboardTecnico />} />
+      <Route
+        path="/login"
+        element={<Login />}
+      />
 
-      {/* Reportes */}
-      <Route path="/crear-reporte" element={<CrearReporte />} />
-      <Route path="/mis-reportes-tecnico" element={<MisReportesTecnico />} />
-      <Route path="/reportes" element={<Reportes />} />
+      <Route
+        path="/registro"
+        element={<Registro />}
+      />
 
-      {/* Redirección si la ruta no existe */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/dashboard-admin"
+        element={<DashboardAdmin />}
+      />
+
+      <Route
+        path="/dashboard-aprendiz"
+        element={<DashboardAprendiz />}
+      />
+
+      <Route
+        path="/dashboard-tecnico"
+        element={<DashboardTecnico />}
+      />
+
+      <Route
+        path="/dashboard-instructor"
+        element={<DashboardInstructor />}
+      />
+
+      <Route
+        path="*"
+        element={<Navigate to="/login" replace />}
+      />
+       
+      <Route path="/crear-reporte" 
+      element={<CrearReporte />} 
+      />
+
+      <Route path="/mis-reportes"
+      element={<MisReportes />}
+      />
+
+      <Route path="/mis-reportes-tecnico"
+      element={<MisReportesTecnico />}
+      />
+
+      <Route path="/detalle-reporte/:id"
+      element={<DetalleReporte />}
+      />
+
+      <Route path="/registrar-usuario"
+      element={<Registro/>}
+      />
+
+      <Route
+        path="/registrar-ambiente"
+        element={<RegistrarAmbiente />}
+      />
+
+      <Route
+        path="/registrar-equipo"
+        element={<RegistrarEquipo />}
+      />
+
+
     </Routes>
   );
 }

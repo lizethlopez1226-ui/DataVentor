@@ -38,6 +38,11 @@ body{
     font-size:2rem;
 }
 
+.topbar h1 span {
+  color: #0cc96a;
+}
+
+
 .auth-main,.registro-main{
     flex:1;
     width:100%;

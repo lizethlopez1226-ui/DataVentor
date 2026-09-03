@@ -1,197 +1,435 @@
-import React, { useState } from 'react';
-import { Send, X } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaHome,
+  FaChartBar,
+  FaLaptop,
+  FaBuilding,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaSignOutAlt,
+} from "react-icons/fa";
 
-export default function CrearReporte() {
-  const [ambiente, setAmbiente] = useState('');
-  const [equipo, setEquipo] = useState('');
-  const [tipoReporte, setTipoReporte] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [prioridad, setPrioridad] = useState('Normal');
+import "../styles/CrearReporte.css";
+import { api } from "../services/api";
 
-  const handleSubmit = (e: React.FormEvent) => {
+interface EquipoDetectado {
+  id_equipo: number;
+  id_ambiente: number | null;
+  serial: string;
+  registro_unico: string;
+  identificador_sistema: string;
+  tipo: string;
+  modelo: string;
+  estado: string;
+}
+
+function ReportarEquipo() {
+  const navigate = useNavigate();
+
+  const [equipoDetectado, setEquipoDetectado] =
+    useState<EquipoDetectado | null>(null);
+
+  const [prioridad, setPrioridad] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+
+  const [cargandoEquipo, setCargandoEquipo] = useState(true);
+  const [cargando, setCargando] = useState(false);
+  const [errorEquipo, setErrorEquipo] = useState("");
+
+  useEffect(() => {
+    const cargarEquipo = async () => {
+      try {
+        setCargandoEquipo(true);
+        setErrorEquipo("");
+
+        const equipo = await api.getIdentificadorEquipo();
+
+        setEquipoDetectado(equipo as EquipoDetectado);
+      } catch (error) {
+        if (error instanceof Error) {
+          setErrorEquipo(error.message);
+        } else {
+          setErrorEquipo(
+            "No fue posible detectar el equipo."
+          );
+        }
+      } finally {
+        setCargandoEquipo(false);
+      }
+    };
+
+    cargarEquipo();
+  }, []);
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuario");
+    navigate("/login");
+  };
+
+  const enviarReporte = async (e: React.FormEvent) => {
     e.preventDefault();
-    const datosReporte = { ambiente, equipo, tipoReporte, descripcion, prioridad };
-    console.log('Reporte enviado:', datosReporte);
-    alert('Reporte enviado con éxito');
+
+    if (!equipoDetectado) {
+      alert("No se ha detectado un equipo registrado.");
+      return;
+    }
+
+    if (!prioridad || !descripcion.trim()) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+
+    const usuarioGuardado = localStorage.getItem("usuario");
+
+    if (!usuarioGuardado) {
+      alert("No hay una sesión activa.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const usuario = JSON.parse(usuarioGuardado);
+
+      setCargando(true);
+
+      const respuesta = await api.crearReporte({
+        id_equipo: equipoDetectado.id_equipo,
+        id_usuario: Number(usuario.id_usuario),
+        descripcion: descripcion.trim(),
+        prioridad: prioridad as "baja" | "media" | "alta",
+      });
+
+      alert(
+        `${respuesta.mensaje}\nReporte #${respuesta.id_reporte}`
+      );
+
+      setPrioridad("");
+      setDescripcion("");
+
+      navigate("/mis-reportes");
+
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("No fue posible crear el reporte.");
+      }
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>1. Crear reporte</h2>
-      <hr style={styles.divider} />
+    <div className="report-page">
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        {/* Ambiente */}
-        <div style={styles.fieldGroup}>
-          <label style={styles.label}>Ambiente</label>
-          <select 
-            value={ambiente} 
-            onChange={(e) => setAmbiente(e.target.value)} 
-            style={styles.select}
-            required
+      <header className="topbar">
+
+        <h1>
+          Data<span>Ventor</span>
+        </h1>
+
+        <nav>
+
+          <a href="/dashboard-aprendiz">
+            <FaHome size={18} />
+            Inicio
+          </a>
+
+          <a href="/mis-reportes">
+            <FaChartBar size={18} />
+            Reportes
+          </a>
+
+          <a
+            href="/login"
+            onClick={cerrarSesion}
           >
-            <option value="">Seleccionar</option>
-            <option value="ambiente_1">Ambiente 101 - Sistemas</option>
-            <option value="ambiente_2">Ambiente 102 - Redes</option>
-            <option value="ambiente_3">Laboratorio de Datos</option>
-          </select>
-        </div>
+            <FaSignOutAlt size={18} />
+            Cerrar Sesión
+          </a>
 
-        {/* Equipo */}
-        <div style={styles.fieldGroup}>
-          <label style={styles.label}>Equipo</label>
-          <select 
-            value={equipo} 
-            onChange={(e) => setEquipo(e.target.value)} 
-            style={styles.select}
-            required
+        </nav>
+
+      </header>
+
+      <main className="report-content">
+
+        <section className="report-title">
+
+          <div>
+
+            <h1>Reportar equipo</h1>
+
+            <p>
+              Registra un problema o novedad
+              de un equipo.
+            </p>
+
+          </div>
+
+        </section>
+
+        <section className="report-container">
+
+          <div className="report-header">
+
+            <div className="report-icon">
+              <FaExclamationTriangle />
+            </div>
+
+            <div>
+
+              <h2>Nuevo reporte</h2>
+
+              <p>
+                Completa la información de la novedad
+                del equipo detectado.
+              </p>
+
+            </div>
+
+          </div>
+
+          <form
+            className="report-form"
+            onSubmit={enviarReporte}
           >
-            <option value="">Seleccionar</option>
-            <option value="pc_01">PC-01</option>
-            <option value="pc_02">PC-02</option>
-            <option value="servidor">Servidor Principal</option>
-          </select>
-        </div>
 
-        {/* Tipo de reporte */}
-        <div style={styles.fieldGroup}>
-          <label style={styles.label}>Tipo de reporte</label>
-          <select 
-            value={tipoReporte} 
-            onChange={(e) => setTipoReporte(e.target.value)} 
-            style={styles.select}
-            required
-          >
-            <option value="">Seleccionar</option>
-            <option value="falla_hardware">Falla de Hardware</option>
-            <option value="falla_software">Falla de Software</option>
-            <option value="mantenimiento">Mantenimiento Preventivo</option>
-          </select>
-        </div>
+            <div className="form-row">
 
-        {/* Descripción */}
-        <div style={styles.fieldGroup}>
-          <label style={styles.label}>Descripción</label>
-          <textarea 
-            value={descripcion} 
-            onChange={(e) => setDescripcion(e.target.value)} 
-            rows={4} 
-            style={styles.textarea}
-            placeholder="Describe el problema o detalle del reporte..."
-            required
-          />
-        </div>
+              <div className="form-group">
 
-        {/* Prioridad */}
-        <div style={styles.fieldGroup}>
-          <label style={styles.label}>Prioridad</label>
-          <select 
-            value={prioridad} 
-            onChange={(e) => setPrioridad(e.target.value)} 
-            style={styles.select}
-          >
-            <option value="Baja">Baja</option>
-            <option value="Normal">Normal</option>
-            <option value="Alta">Alta</option>
-            <option value="Urgente">Urgente</option>
-          </select>
-        </div>
+                <label>
+                  <FaBuilding />
+                  Ambiente
+                </label>
 
-        {/* Botones */}
-        <div style={styles.buttonGroup}>
-          <button type="button" style={styles.cancelBtn} onClick={() => alert('Operación cancelada')}>
-            <X size={16} /> Cancelar
-          </button>
-          <button type="submit" style={styles.submitBtn}>
-            <Send size={16} /> Enviar reporte
-          </button>
-        </div>
-      </form>
+                <div className="input-group">
+                  {cargandoEquipo
+                    ? "Detectando ambiente..."
+                    : equipoDetectado
+                    ? `Ambiente ${equipoDetectado.id_ambiente ?? "No asignado"}`
+                    : "No disponible"}
+                </div>
+
+              </div>
+
+              <div className="form-group">
+
+                <label>
+                  <FaLaptop />
+                  Equipo detectado
+                </label>
+
+                <div className="input-group">
+
+                  {cargandoEquipo && (
+                    <span>
+                      Detectando equipo...
+                    </span>
+                  )}
+
+                  {!cargandoEquipo &&
+                    equipoDetectado && (
+                      <span>
+                        {equipoDetectado.serial} -{" "}
+                        {equipoDetectado.modelo}
+                      </span>
+                    )}
+
+                  {!cargandoEquipo &&
+                    !equipoDetectado && (
+                      <span>
+                        Equipo no encontrado
+                      </span>
+                    )}
+
+                </div>
+
+              </div>
+
+            </div>
+
+            {errorEquipo && (
+              <div className="error-message">
+                {errorEquipo}
+              </div>
+            )}
+
+            {equipoDetectado && (
+              <div className="form-group">
+
+                <label>
+                  <FaLaptop />
+                  Información del equipo
+                </label>
+
+                <div className="input-group">
+                  Serial: {equipoDetectado.serial}
+                  {" | "}
+                  Registro: {equipoDetectado.registro_unico}
+                </div>
+
+              </div>
+            )}
+
+            <div className="form-group">
+
+              <label>
+                <FaExclamationTriangle />
+                Prioridad del reporte
+              </label>
+
+              <div className="status-options">
+
+                <label
+                  className={`status-option ${
+                    prioridad === "baja"
+                      ? "selected"
+                      : ""
+                  }`}
+                >
+
+                  <input
+                    type="radio"
+                    name="prioridad"
+                    value="baja"
+                    checked={prioridad === "baja"}
+                    onChange={(e) =>
+                      setPrioridad(e.target.value)
+                    }
+                  />
+
+                  <FaCheckCircle />
+
+                  <span>
+                    Baja
+                  </span>
+
+                </label>
+
+                <label
+                  className={`status-option ${
+                    prioridad === "media"
+                      ? "selected"
+                      : ""
+                  }`}
+                >
+
+                  <input
+                    type="radio"
+                    name="prioridad"
+                    value="media"
+                    checked={prioridad === "media"}
+                    onChange={(e) =>
+                      setPrioridad(e.target.value)
+                    }
+                  />
+
+                  <FaExclamationTriangle />
+
+                  <span>
+                    Media
+                  </span>
+
+                </label>
+
+                <label
+                  className={`status-option ${
+                    prioridad === "alta"
+                      ? "selected"
+                      : ""
+                  }`}
+                >
+
+                  <input
+                    type="radio"
+                    name="prioridad"
+                    value="alta"
+                    checked={prioridad === "alta"}
+                    onChange={(e) =>
+                      setPrioridad(e.target.value)
+                    }
+                  />
+
+                  <FaExclamationTriangle />
+
+                  <span>
+                    Alta
+                  </span>
+
+                </label>
+
+              </div>
+
+            </div>
+
+            <div className="form-group">
+
+              <label htmlFor="descripcion">
+                Descripción del problema
+              </label>
+
+              <textarea
+                id="descripcion"
+                value={descripcion}
+                onChange={(e) =>
+                  setDescripcion(e.target.value)
+                }
+                placeholder="Describe el problema o novedad del equipo..."
+                rows={6}
+              />
+
+            </div>
+
+            <div className="form-actions">
+
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={() => navigate(-1)}
+                disabled={cargando}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                className="report-button"
+                disabled={
+                  cargando ||
+                  cargandoEquipo ||
+                  !equipoDetectado
+                }
+              >
+
+                <FaExclamationTriangle />
+
+                {cargando
+                  ? "Enviando..."
+                  : "Enviar reporte"}
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </section>
+
+      </main>
+
+      <footer className="admin-footer">
+
+        <p>
+          © 2026 DataVentor — Sistema de gestión de equipos
+        </p>
+
+      </footer>
+
     </div>
   );
 }
 
-// Estilos rápidos en objeto JS para facilitar su uso directo
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    maxWidth: '500px',
-    margin: '20px auto',
-    padding: '24px',
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    fontFamily: 'system-ui, sans-serif'
-  },
-  title: {
-    margin: '0 0 8px 0',
-    fontSize: '20px',
-    color: '#1e293b'
-  },
-  divider: {
-    border: 'none',
-    borderTop: '1px solid #e2e8f0',
-    marginBottom: '20px'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px'
-  },
-  fieldGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px'
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#475569'
-  },
-  select: {
-    padding: '10px',
-    borderRadius: '6px',
-    border: '1px solid #cbd5e1',
-    backgroundColor: '#f8fafc',
-    fontSize: '14px',
-    outline: 'none'
-  },
-  textarea: {
-    padding: '10px',
-    borderRadius: '6px',
-    border: '1px solid #cbd5e1',
-    backgroundColor: '#f8fafc',
-    fontSize: '14px',
-    resize: 'vertical',
-    outline: 'none'
-  },
-  buttonGroup: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-    marginTop: '12px'
-  },
-  cancelBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '10px 16px',
-    border: '1px solid #cbd5e1',
-    backgroundColor: '#ffffff',
-    color: '#475569',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontWeight: '500'
-  },
-  submitBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '10px 16px',
-    border: 'none',
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontWeight: '500'
-  }
-}; 
+export default ReportarEquipo;

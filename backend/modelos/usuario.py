@@ -1,24 +1,70 @@
-class Usuario:
+from sqlalchemy import Column, Integer, String, Enum as SQLEnum, TIMESTAMP
+from sqlalchemy.sql import func
+import enum
 
-    def __init__(self, id_usuario, nombre, correo):
-        self._id_usuario = id_usuario
-        self.__nombre = nombre
-        self.__correo = correo
+from backend.database import Base
 
-    
-    def get_nombre(self):
-        return self.__nombre
 
-    def get_correo(self):
-        return self.__correo
+class RolEnum(str, enum.Enum):
+    aprendiz = "aprendiz"
+    instructor = "instructor"
+    tecnico = "tecnico"
+    administrador = "administrador"
 
-    
-    def set_nombre(self, nombre):
-        self.__nombre = nombre
 
-    def set_correo(self, correo):
-        self.__correo = correo
+class UsuarioModel(Base):
+    __tablename__ = "usuarios"
 
- 
-    def mostrar_tablero(self):
-        print(f"Bienvenido al tablero de {self.__nombre}")
+    id_usuario = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    nombre = Column(
+        String(100),
+        nullable=False
+    )
+
+    apellido = Column(
+        String(100),
+        nullable=False
+    )
+
+    tipo_documento = Column(
+        String(10),
+        nullable=False
+    )
+
+    documento = Column(
+        String(30),
+        unique=True,
+        nullable=False
+    )
+
+    correo = Column(
+        String(150),
+        unique=True,
+        nullable=False
+    )
+
+    contrasena = Column(
+        String(255),
+        nullable=False
+    )
+
+    telefono = Column(
+        String(20),
+        nullable=True
+    )
+
+    rol = Column(
+        SQLEnum(RolEnum),
+        nullable=False
+    )
+
+    fecha_registro = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp(),
+        nullable=False
+    )

@@ -1,0 +1,221 @@
+const API_URL = "http://127.0.0.1:5000";
+
+export interface Reporte {
+  id_reporte?: number;
+  id_equipo: number;
+  id_usuario: number;
+
+  descripcion: string;
+
+  prioridad: "baja" | "media" | "alta";
+
+  estado_reporte?:
+    | "pendiente"
+    | "en_revision"
+    | "resuelto"
+    | "cerrado";
+
+  fecha_reporte?: string;
+  fecha_cierre?: string | null;
+  fecha_actualizacion?: string | null;
+
+  serial?: string;
+  registro_unico?: string;
+  tipo?: string;
+  modelo?: string;
+  id_ambiente?: number;
+
+  nombre?: string;
+  apellido?: string;
+  correo?: string;
+}
+
+export interface ActualizarEstadoPayload {
+  estado:
+    | "pendiente"
+    | "en_revision"
+    | "resuelto"
+    | "cerrado";
+
+  id_usuario: number;
+
+  observaciones?: string;
+}
+
+export interface RegistroResponse {
+  mensaje: string;
+
+  usuario?: {
+    id_usuario: number;
+    nombre: string;
+    apellido: string;
+    tipo_documento: string;
+    documento: string;
+    correo: string;
+    rol: string;
+  };
+}
+
+export interface LoginResponse {
+  mensaje: string;
+
+  usuario: {
+    id_usuario: number;
+    nombre: string;
+    apellido: string;
+    tipo_documento: string;
+    documento: string;
+    correo: string;
+    telefono?: string;
+    rol: string;
+  };
+}
+
+async function request<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(
+    `${API_URL}${endpoint}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+      ...options,
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({}));
+
+    throw new Error(
+      errorData.mensaje ||
+        `Error en la petición: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
+export const api = {
+
+  comprobarBackend: (): Promise<{
+    backend: string;
+    estado: string;
+  }> => {
+    return request("/api/salud");
+  },
+
+  registrar: (datos: {
+    tipo_documento: string;
+    documento: string;
+    nombre: string;
+    apellido: string;
+    correo: string;
+    contrasena: string;
+    rol: string;
+  }): Promise<RegistroResponse> => {
+    return request<RegistroResponse>(
+      "/api/registro",
+      {
+        method: "POST",
+        body: JSON.stringify(datos),
+      }
+    );
+  },
+
+  login: (
+    tipo_documento: string,
+    documento: string,
+    contrasena: string
+  ): Promise<LoginResponse> => {
+    return request<LoginResponse>(
+      "/api/login",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          tipo_documento,
+          documento,
+          contrasena,
+        }),
+      }
+    );
+  },
+
+  getReportes: (
+    id_usuario?: number
+  ): Promise<Reporte[]> => {
+    const url = id_usuario
+      ? `/api/reportes?usuario=${id_usuario}`
+      : "/api/reportes";
+
+    return request<Reporte[]>(url);
+  },
+
+  getReporteById: (
+    id: number
+  ): Promise<Reporte> => {
+    return request<Reporte>(
+      `/api/reportes/${id}`
+    );
+  },
+
+  crearReporte: (
+    reporte: Reporte
+  ): Promise<{
+    mensaje: string;
+    id_reporte: number;
+  }> => {
+    return request(
+      "/api/reportes",
+      {
+        method: "POST",
+        body: JSON.stringify(reporte),
+      }
+    );
+  },
+
+  actualizarEstadoReporte: (
+    id: number,
+    datos: ActualizarEstadoPayload
+  ): Promise<{
+    mensaje: string;
+  }> => {
+    return request(
+      `/api/reportes/${id}/estado`,
+      {
+        method: "PUT",
+        body: JSON.stringify(datos),
+      }
+    );
+  },
+
+  getHistorialReporte: (
+    id: number
+  ) => {
+    return request(
+      `/api/reportes/${id}/historial`
+    );
+  },
+
+  getEquipos: () => {
+    return request("/api/equipos");
+  },
+
+  getEquipoById: (
+    id: number
+  ) => {
+    return request(
+      `/api/equipos/${id}`
+    );
+  },
+
+  getIdentificadorEquipo: () => {
+    return request(
+      "/api/equipos/identificador"
+    );
+  },
+};

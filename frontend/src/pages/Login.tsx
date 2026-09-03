@@ -1,23 +1,90 @@
-import "../styles/formularios.css";
-import { FaEnvelope, 
-  FaLock, 
-  FaEye, 
-  FaEyeSlash 
-} from "react-icons/fa";
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaIdCard,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 import loginImg from "../assets/login.svg";
+import "../styles/formularios.css";
+import { api } from "../services/api";
 
 function Login() {
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const [tipoDocumento, setTipoDocumento] = useState("");
+  const [documento, setDocumento] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [mostrarContrasena, setMostrarContrasena] = useState(false);
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
+
+  const handleLogin = async () => {
+    setError("");
+
+    if (!tipoDocumento || !documento || !contrasena) {
+      setError("Todos los campos son obligatorios");
+      return;
+    }
+
+    setCargando(true);
+
+    try {
+      const respuesta = await api.login(
+        tipoDocumento,
+        documento,
+        contrasena
+      );
+
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify(respuesta.usuario)
+      );
+
+      const rol = respuesta.usuario.rol.toLowerCase();
+
+      console.log("RESPUESTA LOGIN:", respuesta);
+      console.log("ROL RECIBIDO:", respuesta.usuario.rol);
+
+
+      switch (rol) {
+        case "administrador":
+          navigate("/dashboard-admin");
+          break;
+
+        case "aprendiz":
+          navigate("/dashboard-aprendiz");
+          break;
+
+        case "tecnico":
+          navigate("/dashboard-tecnico");
+          break;
+
+        case "instructor":
+          navigate("/dashboard-instructor");
+          break;
+
+        default:
+          setError("El rol del usuario no es válido");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Error al iniciar sesión");
+      }
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <div className="auth-container">
 
       <header className="auth-header">
         <div className="logo">
-          <span>DataVentor</span>
+          Data<span>Ventor</span>
         </div>
       </header>
 
@@ -26,24 +93,58 @@ function Login() {
         <section className="auth-card">
 
           <h2>Bienvenido</h2>
+
           <p className="subtitle">
             Inicia sesión para continuar
           </p>
 
           <div className="input-group">
-            <FaEnvelope />
+            <FaIdCard />
+
+            <select
+              value={tipoDocumento}
+              onChange={(e) => setTipoDocumento(e.target.value)}
+            >
+              <option value="" disabled>
+                Tipo de documento
+              </option>
+
+              <option value="CC">
+                CC - Cédula de ciudadanía
+              </option>
+
+              <option value="TI">
+                TI - Tarjeta de identidad
+              </option>
+
+              <option value="CE">
+                CE - Cédula de extranjería
+              </option>
+
+              <option value="PPT">
+                PPT - Permiso por Protección Temporal
+              </option>
+            </select>
+          </div>
+
+          <div className="input-group">
+            <FaIdCard />
+
             <input
-              type="email"
-              placeholder="Correo institucional"
+              type="text"
+              value={documento}
+              onChange={(e) => setDocumento(e.target.value)}
+              placeholder="Número de documento"
             />
           </div>
 
           <div className="input-group password-group">
-
             <FaLock />
 
             <input
-              type={showPassword ? "text" : "password"}
+              type={mostrarContrasena ? "text" : "password"}
+              value={contrasena}
+              onChange={(e) => setContrasena(e.target.value)}
               placeholder="Contraseña"
             />
 
@@ -51,35 +152,48 @@ function Login() {
               type="button"
               className="eye-btn"
               onClick={() =>
-                setShowPassword(!showPassword)
+                setMostrarContrasena(!mostrarContrasena)
               }
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {mostrarContrasena ? <FaEyeSlash /> : <FaEye />}
             </button>
-
           </div>
 
-          <button className="auth-btn">
-            Ingresar
+          {error && (
+            <p className="error-message">
+              {error}
+            </p>
+          )}
+
+          <button
+            className="auth-btn"
+            onClick={handleLogin}
+            disabled={cargando}
+          >
+            {cargando ? "Ingresando..." : "Ingresar"}
           </button>
 
           <div className="auth-link">
             ¿No tienes cuenta?
-            <Link to="/registro"> Registrarse</Link>
+
+            <Link to="/registro">
+              {" "}Registrarse
+            </Link>
           </div>
 
         </section>
 
         <section className="auth-left">
 
-              <img src={loginImg} alt="Ilustración Login" />
-              <a href="https://storyset.com/tchnology">Technology illustrations by Storyset</a>
+          <img
+            src={loginImg}
+            alt="Ilustración Login"
+          />
 
           <h2>DataVentor</h2>
 
           <p>
-            Sistema de gestión y mantenimiento
-            de equipos de cómputo.
+            Sistema de gestión y mantenimiento de equipos de cómputo.
           </p>
 
         </section>

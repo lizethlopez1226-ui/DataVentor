@@ -16,6 +16,7 @@ import {
   Wrench
 } from 'lucide-react';
 
+
 export default function App() {
   const [seccion, setSeccion] = useState<'inicio' | 'crearReporte' | 'misReportes'>('misReportes');
 

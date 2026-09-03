@@ -1,7 +1,8 @@
 import { Fullscreen } from "lucide-react";
 import "../styles/dashboardAprendiz.css";
+import { useNavigate } from "react-router-dom";
 import {
-    FaHome,
+  FaHome,
   FaLaptop,
   FaBuilding,
   FaUsers,
@@ -15,19 +16,20 @@ import {
 } from "react-icons/fa";
 
 function DashboardAdmin() {
+  const navigate = useNavigate();
+
   return (
     <div className="dashboard-admin">
 
       <header className="topbar">
-        <h1>DataVentor</h1>
+       <h1>
+         Data<span>Ventor</span>
+         </h1>
 
         <nav>
-          <a href="#"><FaHome size={18} />Inicio</a>
-          <a href="#"><FaLaptop size={18} />Equipos</a>
-          <a href="#"><FaBuilding size={18} />Ambiente</a>
-          <a href="#"><FaUsers size={18} />Usuarios</a>
-          <a href="#"><FaChartBar size={18} /> Reportes</a>
-          <a href="#"><FaSignOutAlt />Cerrar Sesión</a>
+          <a href="/dashboard-admin"><FaHome size={18} />Inicio</a>
+          <a href="/detalle-reporte"><FaChartBar size={18} /> Reportes</a>
+          <a href="/login"><FaSignOutAlt />Cerrar Sesión</a>
         </nav>
 
         <div className="user">
@@ -76,25 +78,23 @@ function DashboardAdmin() {
 
         <div className="quick-actions">
           <h3>Acciones Rapidas</h3>
-          <button>
-            <FaUserPlus size={18} />
-            Crear Usuario
-          </button>
+      
 
-        <button>
+        <button onClick={() => navigate("/registrar-ambiente")}>
           <FaBuilding size={18} />
-            Registrar Ambiente
-          </button>
+          Registrar Ambiente
+        </button>
 
-        <button>
+        <button onClick={() => navigate("/registrar-equipo")}>
         <FaLaptop size={18} />
           Registrar Equipo
         </button>
 
-      <button>
-        <FaChartBar size={18} />
-      Ver Reportes
-    </button>
+        <button onClick={() => navigate("/registrar-usuario")}>
+          <FaUserPlus size={18} />
+          Registrar Usuarios
+        </button>
+
         </div>
 
 
@@ -170,4 +170,4 @@ function DashboardAdmin() {
 }
 
 export default DashboardAdmin;
- 
+  
