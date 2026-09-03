@@ -177,3 +177,75 @@ def crear_usuario():
 
         if conexion:
             conexion.close()
+
+@usuarios_bp.route(
+    "/api/usuarios",
+    methods=["GET"]
+)
+def obtener_usuarios():
+
+    conexion = None
+    cursor = None
+
+    try:
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            """
+            SELECT
+                id_usuario,
+                nombre,
+                apellido,
+                tipo_documento,
+                documento,
+                correo,
+                telefono,
+                rol,
+                fecha_registro
+            FROM usuarios
+            ORDER BY id_usuario;
+            """
+        )
+
+        usuarios = cursor.fetchall()
+
+        resultado = []
+
+        for usuario in usuarios:
+
+            resultado.append({
+                "id_usuario": usuario[0],
+                "nombre": usuario[1],
+                "apellido": usuario[2],
+                "tipo_documento": usuario[3],
+                "documento": usuario[4],
+                "correo": usuario[5],
+                "telefono": usuario[6],
+                "rol": usuario[7],
+                "fecha_registro": usuario[8]
+            })
+
+        return jsonify(resultado), 200
+
+    except Exception as error:
+
+        print(
+            "ERROR AL CONSULTAR USUARIOS:",
+            repr(error),
+            flush=True
+        )
+
+        return jsonify({
+            "mensaje": "No fue posible consultar los usuarios.",
+            "error": str(error)
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()

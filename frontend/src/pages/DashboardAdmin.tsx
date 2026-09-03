@@ -1,7 +1,10 @@
 import { Fullscreen } from "lucide-react";
+
 import "../styles/dashboardAprendiz.css";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
+
+
 import {
   FaHome,
   FaLaptop,
@@ -16,57 +19,258 @@ import {
   FaSignOutAlt,
   FaTimes,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
+const API_URL = "http://127.0.0.1:5000";
+
+interface Reporte {
+  id_reporte: number;
+  id_usuario: number;
+  id_equipo: number;
+  descripcion: string;
+  prioridad: string;
+  estado_reporte: string;
+  fecha_reporte?: string;
+  nombre?: string;
+  apellido?: string;
+  serial?: string;
+  modelo?: string;
+}
 
 function DashboardAdmin() {
-  const navigate = useNavigate();
 
-  const [mostrarAmbiente, setMostrarAmbiente] = useState(false);
-  const [mostrarEquipo, setMostrarEquipo] = useState(false);
-  const [mostrarUsuario, setMostrarUsuario] = useState(false);
 
-  const [nombreAmbiente, setNombreAmbiente] = useState("");
-  const [idSede, setIdSede] = useState("");
+  const [mostrarAmbiente, setMostrarAmbiente] =
+    useState(false);
 
-  const [idAmbiente, setIdAmbiente] = useState("");
-  const [serial, setSerial] = useState("");
-  const [registroUnico, setRegistroUnico] = useState("");
-  const [tipo, setTipo] = useState("");
-  const [modelo, setModelo] = useState("");
-  const [identificadorSistema, setIdentificadorSistema] = useState("");
+  const [mostrarEquipo, setMostrarEquipo] =
+    useState(false);
 
-  const [tipoDocumento, setTipoDocumento] = useState("");
-  const [documento, setDocumento] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [rol, setRol] = useState("");
+  const [mostrarUsuario, setMostrarUsuario] =
+    useState(false);
+
+  const [equipos, setEquipos] = useState(0);
+
+  const [ambientes, setAmbientes] = useState(0);
+
+  const [usuarios, setUsuarios] = useState(0);
+
+  const [pendientes, setPendientes] = useState(0);
+
+  const [reportes, setReportes] =
+    useState<Reporte[]>([]);
+
+  const [cargando, setCargando] =
+    useState(true);
+
+  const [nombreAmbiente, setNombreAmbiente] =
+    useState("");
+
+  const [idSede, setIdSede] =
+    useState("");
+
+  const [idAmbiente, setIdAmbiente] =
+    useState("");
+
+  const [serial, setSerial] =
+    useState("");
+
+  const [registroUnico, setRegistroUnico] =
+    useState("");
+
+  const [tipo, setTipo] =
+    useState("");
+
+  const [modelo, setModelo] =
+    useState("");
+
+  const [identificadorSistema, setIdentificadorSistema] =
+    useState("");
+
+  const [tipoDocumento, setTipoDocumento] =
+    useState("");
+
+  const [documento, setDocumento] =
+    useState("");
+
+  const [nombre, setNombre] =
+    useState("");
+
+  const [apellido, setApellido] =
+    useState("");
+
+  const [correo, setCorreo] =
+    useState("");
+
+  const [contrasena, setContrasena] =
+    useState("");
+
+  const [telefono, setTelefono] =
+    useState("");
+
+  const [rol, setRol] =
+    useState("");
+
+  const cargarDashboard = async () => {
+
+    try {
+
+      setCargando(true);
+
+      const [
+        equiposResponse,
+        ambientesResponse,
+        usuariosResponse,
+        reportesResponse
+      ] = await Promise.all([
+
+        fetch(
+          `${API_URL}/api/equipos`
+        ),
+
+        fetch(
+          `${API_URL}/api/ambientes`
+        ),
+
+        fetch(
+          `${API_URL}/api/usuarios`
+        ),
+
+        fetch(
+          `${API_URL}/api/reportes`
+        )
+
+      ]);
+
+      const equiposData =
+        await equiposResponse.json();
+
+      const ambientesData =
+        await ambientesResponse.json();
+
+      const usuariosData =
+        await usuariosResponse.json();
+
+      const reportesData =
+        await reportesResponse.json();
+
+      if (!equiposResponse.ok) {
+        throw new Error(
+          equiposData.mensaje ||
+          "No se pudieron consultar los equipos."
+        );
+      }
+
+      if (!ambientesResponse.ok) {
+        throw new Error(
+          ambientesData.mensaje ||
+          "No se pudieron consultar los ambientes."
+        );
+      }
+
+      if (!usuariosResponse.ok) {
+        throw new Error(
+          usuariosData.mensaje ||
+          "No se pudieron consultar los usuarios."
+        );
+      }
+
+      if (!reportesResponse.ok) {
+        throw new Error(
+          reportesData.mensaje ||
+          "No se pudieron consultar los reportes."
+        );
+      }
+
+      setEquipos(
+        Array.isArray(equiposData)
+          ? equiposData.length
+          : 0
+      );
+
+      setAmbientes(
+        Array.isArray(ambientesData)
+          ? ambientesData.length
+          : 0
+      );
+
+      setUsuarios(
+        Array.isArray(usuariosData)
+          ? usuariosData.length
+          : 0
+      );
+
+      setReportes(
+        Array.isArray(reportesData)
+          ? reportesData
+          : []
+      );
+
+      setPendientes(
+        Array.isArray(reportesData)
+          ? reportesData.filter(
+              (reporte: Reporte) =>
+                reporte.estado_reporte ===
+                "pendiente"
+            ).length
+          : 0
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Error cargando dashboard:",
+        error
+      );
+
+    } finally {
+
+      setCargando(false);
+
+    }
+  };
+
+  useEffect(() => {
+
+    cargarDashboard();
+
+  }, []);
 
   const cerrarModales = () => {
+
     setMostrarAmbiente(false);
     setMostrarEquipo(false);
     setMostrarUsuario(false);
+
   };
 
   const registrarAmbiente = async (
     e: React.FormEvent
   ) => {
+
     e.preventDefault();
 
     if (!nombreAmbiente || !idSede) {
-      alert("Completa todos los campos.");
+
+      alert(
+        "Completa todos los campos."
+      );
+
       return;
     }
 
     try {
+
       const response = await fetch(
-        "http://127.0.0.1:5000/api/ambientes",
+        `${API_URL}/api/ambientes`,
         {
           method: "POST",
+
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
+
           body: JSON.stringify({
             nombre: nombreAmbiente,
             id_sede: Number(idSede),
@@ -74,33 +278,45 @@ function DashboardAdmin() {
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
+
         throw new Error(
           data.mensaje ||
-            "No fue posible registrar el ambiente."
+          "No fue posible registrar el ambiente."
         );
+
       }
 
-      alert("Ambiente registrado correctamente.");
+      alert(
+        "Ambiente registrado correctamente."
+      );
 
       setNombreAmbiente("");
       setIdSede("");
+
       cerrarModales();
 
+      cargarDashboard();
+
     } catch (error) {
+
       alert(
         error instanceof Error
           ? error.message
           : "Error al registrar el ambiente."
       );
+
     }
+
   };
 
   const registrarEquipo = async (
     e: React.FormEvent
   ) => {
+
     e.preventDefault();
 
     if (
@@ -110,40 +326,63 @@ function DashboardAdmin() {
       !tipo ||
       !modelo
     ) {
-      alert("Completa todos los campos obligatorios.");
+
+      alert(
+        "Completa todos los campos obligatorios."
+      );
+
       return;
     }
 
     try {
+
       const response = await fetch(
-        "http://127.0.0.1:5000/api/equipos",
+        `${API_URL}/api/equipos`,
         {
           method: "POST",
+
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
+
           body: JSON.stringify({
-            id_ambiente: Number(idAmbiente),
+
+            id_ambiente:
+              Number(idAmbiente),
+
             serial,
-            registro_unico: registroUnico,
+
+            registro_unico:
+              registroUnico,
+
             tipo,
+
             modelo,
+
             identificador_sistema:
-              identificadorSistema || null,
+              identificadorSistema ||
+              null,
+
           }),
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
+
         throw new Error(
           data.mensaje ||
-            "No fue posible registrar el equipo."
+          "No fue posible registrar el equipo."
         );
+
       }
 
-      alert("Equipo registrado correctamente.");
+      alert(
+        "Equipo registrado correctamente."
+      );
 
       setIdAmbiente("");
       setSerial("");
@@ -154,18 +393,24 @@ function DashboardAdmin() {
 
       cerrarModales();
 
+      cargarDashboard();
+
     } catch (error) {
+
       alert(
         error instanceof Error
           ? error.message
           : "Error al registrar el equipo."
       );
+
     }
+
   };
 
   const registrarUsuario = async (
     e: React.FormEvent
   ) => {
+
     e.preventDefault();
 
     if (
@@ -177,41 +422,64 @@ function DashboardAdmin() {
       !contrasena ||
       !rol
     ) {
-      alert("Completa todos los campos obligatorios.");
+
+      alert(
+        "Completa todos los campos obligatorios."
+      );
+
       return;
     }
 
     try {
+
       const response = await fetch(
-        "http://127.0.0.1:5000/api/registro",
+        `${API_URL}/api/registro`,
         {
           method: "POST",
+
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
+
           body: JSON.stringify({
-            tipo_documento: tipoDocumento,
+
+            tipo_documento:
+              tipoDocumento,
+
             documento,
+
             nombre,
+
             apellido,
+
             correo,
+
             contrasena,
+
             telefono,
+
             rol,
+
           }),
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
+
         throw new Error(
           data.mensaje ||
-            "No fue posible registrar el usuario."
+          "No fue posible registrar el usuario."
         );
+
       }
 
-      alert("Usuario registrado correctamente.");
+      alert(
+        "Usuario registrado correctamente."
+      );
 
       setTipoDocumento("");
       setDocumento("");
@@ -224,16 +492,22 @@ function DashboardAdmin() {
 
       cerrarModales();
 
+      cargarDashboard();
+
     } catch (error) {
+
       alert(
         error instanceof Error
           ? error.message
           : "Error al registrar el usuario."
       );
+
     }
+
   };
 
   return (
+
     <div className="dashboard-admin">
 
       <header className="topbar">
@@ -249,15 +523,17 @@ function DashboardAdmin() {
             Inicio
           </a>
 
-          <a href="/detalle-reporte">
+           <a href="/reportes-admin">
             <FaChartBar size={18} />
-            Reportes
-          </a>
+              Reportes
+            </a>
 
           <a href="/login">
             <FaSignOutAlt />
             Cerrar Sesión
           </a>
+
+         
 
         </nav>
 
@@ -268,6 +544,7 @@ function DashboardAdmin() {
           Administrador
 
         </div>
+
 
       </header>
 
@@ -291,7 +568,11 @@ function DashboardAdmin() {
 
             <FaLaptop size={32} />
 
-            <h3>248</h3>
+            <h3>
+              {cargando
+                ? "..."
+                : equipos}
+            </h3>
 
             <span>
               Equipos Totales
@@ -303,7 +584,11 @@ function DashboardAdmin() {
 
             <FaBuilding size={32} />
 
-            <h3>15</h3>
+            <h3>
+              {cargando
+                ? "..."
+                : ambientes}
+            </h3>
 
             <span>
               Ambientes
@@ -313,9 +598,15 @@ function DashboardAdmin() {
 
           <div className="card orange">
 
-            <FaExclamationTriangle size={32} />
+            <FaExclamationTriangle
+              size={32}
+            />
 
-            <h3>23</h3>
+            <h3>
+              {cargando
+                ? "..."
+                : pendientes}
+            </h3>
 
             <span>
               Pendientes
@@ -327,7 +618,11 @@ function DashboardAdmin() {
 
             <FaUsers size={32} />
 
-            <h3>36</h3>
+            <h3>
+              {cargando
+                ? "..."
+                : usuarios}
+            </h3>
 
             <span>
               Usuarios
@@ -351,8 +646,11 @@ function DashboardAdmin() {
                 setMostrarAmbiente(true);
               }}
             >
+
               <FaBuilding size={18} />
+
               Registrar Ambiente
+
             </button>
 
             <button
@@ -361,8 +659,11 @@ function DashboardAdmin() {
                 setMostrarEquipo(true);
               }}
             >
+
               <FaLaptop size={18} />
+
               Registrar Equipo
+
             </button>
 
             <button
@@ -371,8 +672,11 @@ function DashboardAdmin() {
                 setMostrarUsuario(true);
               }}
             >
+
               <FaUserPlus size={18} />
+
               Registrar Usuarios
+
             </button>
 
           </div>
@@ -407,71 +711,124 @@ function DashboardAdmin() {
 
               <tbody>
 
-                <tr>
+                {cargando ? (
 
-                  <td>#001</td>
+                  <tr>
 
-                  <td>Juan Acosta</td>
+                    <td colSpan={4}>
+                      Cargando reportes...
+                    </td>
 
-                  <td>HP 250</td>
+                  </tr>
 
-                  <td>
+                ) : reportes.length === 0 ? (
 
-                    <span className="estado pendiente">
+                  <tr>
 
-                      <FaExclamationTriangle />
+                    <td colSpan={4}>
+                      No hay reportes registrados.
+                    </td>
 
-                      Pendiente
+                  </tr>
 
-                    </span>
+                ) : (
 
-                  </td>
+                  reportes
+                    .slice(0, 5)
+                    .map((reporte) => (
 
-                </tr>
+                      <tr
+                        key={
+                          reporte.id_reporte
+                        }
+                      >
 
-                <tr>
+                        <td>
+                          #
+                          {String(
+                            reporte.id_reporte
+                          ).padStart(
+                            3,
+                            "0"
+                          )}
+                        </td>
 
-                  <td>#002</td>
+                        <td>
+                          {reporte.nombre
+                            ? `${reporte.nombre} ${
+                                reporte.apellido ||
+                                ""
+                              }`
+                            : `Usuario #${reporte.id_usuario}`}
+                        </td>
 
-                  <td>Santiago Martinez</td>
+                        <td>
+                          {reporte.modelo ||
+                            reporte.serial ||
+                            `Equipo #${reporte.id_equipo}`}
+                        </td>
 
-                  <td>Dell Optiplex</td>
+                        <td>
 
-                  <td>
+                          {reporte.estado_reporte ===
+                            "pendiente" && (
 
-                    <span className="estado proceso">
+                            <span className="estado pendiente">
 
-                      <FaTools />
+                              <FaExclamationTriangle />
 
-                      En Proceso
+                              Pendiente
 
-                    </span>
+                            </span>
 
-                  </td>
+                          )}
 
-                </tr>
+                          {reporte.estado_reporte ===
+                            "en_revision" && (
 
-                <tr>
+                            <span className="estado proceso">
 
-                  <td>#003</td>
+                              <FaTools />
 
-                  <td>Juan Beltran</td>
+                              En Proceso
 
-                  <td>Lenovo ThinkCentre</td>
+                            </span>
 
-                  <td>
+                          )}
 
-                    <span className="estado resuelto">
+                          {reporte.estado_reporte ===
+                            "resuelto" && (
 
-                      <FaCheckCircle />
+                            <span className="estado resuelto">
 
-                      Resuelto
+                              <FaCheckCircle />
 
-                    </span>
+                              Resuelto
 
-                  </td>
+                            </span>
 
-                </tr>
+                          )}
+
+                          {reporte.estado_reporte ===
+                            "cerrado" && (
+
+                            <span className="estado resuelto">
+
+                              <FaCheckCircle />
+
+                              Cerrado
+
+                            </span>
+
+                          )}
+
+                        </td>
+
+                      </tr>
+
+                    ))
+
+                )}
 
               </tbody>
 
@@ -503,11 +860,16 @@ function DashboardAdmin() {
             </button>
 
             <h2>
+
               <FaBuilding />
+
               Registrar Ambiente
+
             </h2>
 
-            <form onSubmit={registrarAmbiente}>
+            <form
+              onSubmit={registrarAmbiente}
+            >
 
               <label>
                 Nombre del ambiente
@@ -517,7 +879,9 @@ function DashboardAdmin() {
                 type="text"
                 value={nombreAmbiente}
                 onChange={(e) =>
-                  setNombreAmbiente(e.target.value)
+                  setNombreAmbiente(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. Ambiente 101"
               />
@@ -530,14 +894,19 @@ function DashboardAdmin() {
                 type="number"
                 value={idSede}
                 onChange={(e) =>
-                  setIdSede(e.target.value)
+                  setIdSede(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. 1"
               />
 
               <button type="submit">
+
                 <FaBuilding />
+
                 Registrar Ambiente
+
               </button>
 
             </form>
@@ -562,11 +931,16 @@ function DashboardAdmin() {
             </button>
 
             <h2>
+
               <FaLaptop />
+
               Registrar Equipo
+
             </h2>
 
-            <form onSubmit={registrarEquipo}>
+            <form
+              onSubmit={registrarEquipo}
+            >
 
               <label>
                 ID del ambiente
@@ -576,7 +950,9 @@ function DashboardAdmin() {
                 type="number"
                 value={idAmbiente}
                 onChange={(e) =>
-                  setIdAmbiente(e.target.value)
+                  setIdAmbiente(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. 1"
               />
@@ -589,7 +965,9 @@ function DashboardAdmin() {
                 type="text"
                 value={serial}
                 onChange={(e) =>
-                  setSerial(e.target.value)
+                  setSerial(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. EQ-001"
               />
@@ -602,7 +980,9 @@ function DashboardAdmin() {
                 type="text"
                 value={registroUnico}
                 onChange={(e) =>
-                  setRegistroUnico(e.target.value)
+                  setRegistroUnico(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. REG-001"
               />
@@ -615,7 +995,9 @@ function DashboardAdmin() {
                 type="text"
                 value={tipo}
                 onChange={(e) =>
-                  setTipo(e.target.value)
+                  setTipo(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. Torre PC"
               />
@@ -628,7 +1010,9 @@ function DashboardAdmin() {
                 type="text"
                 value={modelo}
                 onChange={(e) =>
-                  setModelo(e.target.value)
+                  setModelo(
+                    e.target.value
+                  )
                 }
                 placeholder="Ej. Lenovo ThinkCentre"
               />
@@ -639,7 +1023,9 @@ function DashboardAdmin() {
 
               <input
                 type="text"
-                value={identificadorSistema}
+                value={
+                  identificadorSistema
+                }
                 onChange={(e) =>
                   setIdentificadorSistema(
                     e.target.value
@@ -649,8 +1035,11 @@ function DashboardAdmin() {
               />
 
               <button type="submit">
+
                 <FaLaptop />
+
                 Registrar Equipo
+
               </button>
 
             </form>
@@ -675,11 +1064,16 @@ function DashboardAdmin() {
             </button>
 
             <h2>
+
               <FaUserPlus />
+
               Registrar Usuario
+
             </h2>
 
-            <form onSubmit={registrarUsuario}>
+            <form
+              onSubmit={registrarUsuario}
+            >
 
               <label>
                 Tipo de documento
@@ -688,9 +1082,12 @@ function DashboardAdmin() {
               <select
                 value={tipoDocumento}
                 onChange={(e) =>
-                  setTipoDocumento(e.target.value)
+                  setTipoDocumento(
+                    e.target.value
+                  )
                 }
               >
+
                 <option value="">
                   Seleccionar
                 </option>
@@ -721,7 +1118,9 @@ function DashboardAdmin() {
                 type="text"
                 value={documento}
                 onChange={(e) =>
-                  setDocumento(e.target.value)
+                  setDocumento(
+                    e.target.value
+                  )
                 }
               />
 
@@ -733,7 +1132,9 @@ function DashboardAdmin() {
                 type="text"
                 value={nombre}
                 onChange={(e) =>
-                  setNombre(e.target.value)
+                  setNombre(
+                    e.target.value
+                  )
                 }
               />
 
@@ -745,7 +1146,9 @@ function DashboardAdmin() {
                 type="text"
                 value={apellido}
                 onChange={(e) =>
-                  setApellido(e.target.value)
+                  setApellido(
+                    e.target.value
+                  )
                 }
               />
 
@@ -757,7 +1160,9 @@ function DashboardAdmin() {
                 type="email"
                 value={correo}
                 onChange={(e) =>
-                  setCorreo(e.target.value)
+                  setCorreo(
+                    e.target.value
+                  )
                 }
               />
 
@@ -769,7 +1174,9 @@ function DashboardAdmin() {
                 type="password"
                 value={contrasena}
                 onChange={(e) =>
-                  setContrasena(e.target.value)
+                  setContrasena(
+                    e.target.value
+                  )
                 }
               />
 
@@ -781,7 +1188,9 @@ function DashboardAdmin() {
                 type="text"
                 value={telefono}
                 onChange={(e) =>
-                  setTelefono(e.target.value)
+                  setTelefono(
+                    e.target.value
+                  )
                 }
               />
 
@@ -792,7 +1201,9 @@ function DashboardAdmin() {
               <select
                 value={rol}
                 onChange={(e) =>
-                  setRol(e.target.value)
+                  setRol(
+                    e.target.value
+                  )
                 }
               >
 
@@ -819,8 +1230,11 @@ function DashboardAdmin() {
               </select>
 
               <button type="submit">
+
                 <FaUserPlus />
+
                 Registrar Usuario
+
               </button>
 
             </form>

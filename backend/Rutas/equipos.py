@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify, request
-
 from backend.conexion import obtener_conexion
-
-from backend.lector_equipo import obtener_uuid_equipo
+from backend.lector_equipo import obtener_informacion_equipo
 
 
 equipos_bp = Blueprint(
@@ -21,12 +19,10 @@ def obtener_equipos():
     cursor = None
 
     try:
-
         conexion = obtener_conexion()
         cursor = conexion.cursor()
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT
                 id_equipo,
                 id_ambiente,
@@ -38,15 +34,13 @@ def obtener_equipos():
                 estado
             FROM equipos
             ORDER BY id_equipo;
-            """
-        )
+        """)
 
         equipos = cursor.fetchall()
 
         resultado = []
 
         for equipo in equipos:
-
             resultado.append({
                 "id_equipo": equipo[0],
                 "id_ambiente": equipo[1],
@@ -88,12 +82,34 @@ def obtener_equipos():
 )
 def obtener_equipo_identificador():
 
-    identificador = obtener_uuid_equipo()
+    informacion = obtener_informacion_equipo()
 
-    if not identificador:
+    print(
+        "INFORMACION DEL EQUIPO DETECTADO:",
+        informacion,
+        flush=True
+    )
+
+    if not informacion:
 
         return jsonify({
-            "mensaje": "No fue posible obtener el identificador del equipo."
+            "mensaje": "No fue posible detectar el computador."
+        }), 500
+
+    uuid = informacion.get("uuid")
+    fabricante = informacion.get("fabricante")
+    modelo_detectado = informacion.get("modelo")
+    serial_detectado = informacion.get("serial")
+
+    print("UUID DETECTADO:", uuid, flush=True)
+    print("FABRICANTE:", fabricante, flush=True)
+    print("MODELO:", modelo_detectado, flush=True)
+    print("SERIAL:", serial_detectado, flush=True)
+
+    if not uuid:
+
+        return jsonify({
+            "mensaje": "No fue posible obtener el identificador del computador."
         }), 500
 
     conexion = None
@@ -104,8 +120,7 @@ def obtener_equipo_identificador():
         conexion = obtener_conexion()
         cursor = conexion.cursor()
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT
                 id_equipo,
                 id_ambiente,
@@ -117,17 +132,132 @@ def obtener_equipo_identificador():
                 estado
             FROM equipos
             WHERE identificador_sistema = %s;
-            """,
-            (identificador,)
-        )
+        """, (uuid,))
 
         equipo = cursor.fetchone()
 
-        if not equipo:
+        if equipo:
+
+            print(
+                "EQUIPO ENCONTRADO EN BASE DE DATOS:",
+                equipo,
+                flush=True
+            )
 
             return jsonify({
-                "mensaje": "El equipo no está registrado en DataVentor."
+                "id_equipo": equipo[0],
+                "id_ambiente": equipo[1],
+                "serial": equipo[2],
+                "registro_unico": equipo[3],
+                "identificador_sistema": equipo[4],
+                "tipo": equipo[5],
+                "modelo": equipo[6],
+                "estado": equipo[7],
+                "detectado": True
+            }), 200
+
+        print(
+            "EQUIPO NO REGISTRADO. REGISTRANDO AUTOMATICAMENTE...",
+            flush=True
+        )
+
+        id_ambiente = 109
+
+        cursor.execute("""
+            SELECT id_ambiente
+            FROM ambientes
+            WHERE id_ambiente = %s;
+        """, (id_ambiente,))
+
+        ambiente = cursor.fetchone()
+
+        if not ambiente:
+
+            return jsonify({
+                "mensaje": "El ambiente 109 no existe."
             }), 404
+
+        cursor.execute("""
+            SELECT COALESCE(MAX(id_equipo), 0) + 1
+            FROM equipos;
+        """)
+
+        nuevo_id = cursor.fetchone()[0]
+
+        registro_unico = f"REG-{nuevo_id:03d}"
+
+        serial = serial_detectado
+
+        if not serial or serial.upper() in [
+            "NONE",
+            "DEFAULT STRING",
+            "TO BE FILLED BY O.E.M."
+        ]:
+            serial = f"SERIAL-{uuid[:8]}"
+
+        tipo = "computador"
+
+        if fabricante and modelo_detectado:
+            modelo = f"{fabricante} {modelo_detectado}"
+
+        elif modelo_detectado:
+            modelo = modelo_detectado
+
+        elif fabricante:
+            modelo = fabricante
+
+        else:
+            modelo = "Computador"
+
+        cursor.execute("""
+            INSERT INTO equipos (
+                id_equipo,
+                id_ambiente,
+                serial,
+                registro_unico,
+                identificador_sistema,
+                tipo,
+                modelo,
+                estado
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                'buen_estado'
+            )
+            RETURNING
+                id_equipo,
+                id_ambiente,
+                serial,
+                registro_unico,
+                identificador_sistema,
+                tipo,
+                modelo,
+                estado;
+        """, (
+            nuevo_id,
+            id_ambiente,
+            serial,
+            registro_unico,
+            uuid,
+            tipo,
+            modelo
+        ))
+
+        equipo = cursor.fetchone()
+
+        conexion.commit()
+
+        print(
+            "EQUIPO REGISTRADO AUTOMATICAMENTE:",
+            equipo,
+            flush=True
+        )
 
         return jsonify({
             "id_equipo": equipo[0],
@@ -137,19 +267,23 @@ def obtener_equipo_identificador():
             "identificador_sistema": equipo[4],
             "tipo": equipo[5],
             "modelo": equipo[6],
-            "estado": equipo[7]
+            "estado": equipo[7],
+            "detectado": True
         }), 200
 
     except Exception as error:
 
+        if conexion:
+            conexion.rollback()
+
         print(
-            "ERROR AL CONSULTAR EQUIPO POR IDENTIFICADOR:",
+            "ERROR AL DETECTAR EQUIPO:",
             repr(error),
             flush=True
         )
 
         return jsonify({
-            "mensaje": "No fue posible consultar el equipo.",
+            "mensaje": "No fue posible detectar el equipo.",
             "error": str(error)
         }), 500
 
@@ -223,14 +357,11 @@ def crear_equipo():
         conexion = obtener_conexion()
         cursor = conexion.cursor()
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT id_ambiente
             FROM ambientes
             WHERE id_ambiente = %s;
-            """,
-            (id_ambiente,)
-        )
+        """, (id_ambiente,))
 
         ambiente = cursor.fetchone()
 
@@ -240,41 +371,33 @@ def crear_equipo():
                 "mensaje": "El ambiente indicado no existe."
             }), 404
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT id_equipo
             FROM equipos
             WHERE serial = %s
                OR registro_unico = %s;
-            """,
-            (
-                serial,
-                registro_unico
-            )
-        )
+        """, (
+            serial,
+            registro_unico
+        ))
 
         equipo_existente = cursor.fetchone()
 
         if equipo_existente:
 
             return jsonify({
-                "mensaje":
-                "El serial o registro único ya está registrado."
+                "mensaje": "El serial o registro único ya está registrado."
             }), 409
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT COALESCE(MAX(id_equipo), 0) + 1
             FROM equipos;
-            """
-        )
+        """)
 
         nuevo_id = cursor.fetchone()[0]
 
-        cursor.execute(
-            """
-            INSERT INTO equipos
-            (
+        cursor.execute("""
+            INSERT INTO equipos (
                 id_equipo,
                 id_ambiente,
                 serial,
@@ -284,8 +407,7 @@ def crear_equipo():
                 modelo,
                 estado
             )
-            VALUES
-            (
+            VALUES (
                 %s,
                 %s,
                 %s,
@@ -293,7 +415,7 @@ def crear_equipo():
                 %s,
                 %s,
                 %s,
-                'disponible'
+                'buen_estado'
             )
             RETURNING
                 id_equipo,
@@ -304,17 +426,15 @@ def crear_equipo():
                 tipo,
                 modelo,
                 estado;
-            """,
-            (
-                nuevo_id,
-                id_ambiente,
-                serial,
-                registro_unico,
-                identificador_sistema,
-                tipo,
-                modelo
-            )
-        )
+        """, (
+            nuevo_id,
+            id_ambiente,
+            serial,
+            registro_unico,
+            identificador_sistema,
+            tipo,
+            modelo
+        ))
 
         equipo = cursor.fetchone()
 

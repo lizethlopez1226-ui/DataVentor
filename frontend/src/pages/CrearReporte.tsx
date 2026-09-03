@@ -27,6 +27,10 @@ interface EquipoDetectado {
 function ReportarEquipo() {
   const navigate = useNavigate();
 
+  // ============================================================
+  // EQUIPO DETECTADO
+  // ============================================================
+
   const [equipoDetectado, setEquipoDetectado] =
     useState<EquipoDetectado | null>(null);
 
@@ -37,16 +41,34 @@ function ReportarEquipo() {
   const [cargando, setCargando] = useState(false);
   const [errorEquipo, setErrorEquipo] = useState("");
 
+  // ============================================================
+  // DETECTAR EL EQUIPO DEL COMPUTADOR ACTUAL
+  // ============================================================
+
   useEffect(() => {
     const cargarEquipo = async () => {
       try {
         setCargandoEquipo(true);
         setErrorEquipo("");
 
+        console.log("Detectando equipo...");
+
+        // IMPORTANTE:
+        // Ya no cargamos todos los equipos de la base de datos.
+        // Ahora pedimos al backend el equipo detectado.
         const equipo = await api.getIdentificadorEquipo();
+
+        console.log("Equipo detectado:", equipo);
 
         setEquipoDetectado(equipo as EquipoDetectado);
       } catch (error) {
+        console.error(
+          "Error detectando equipo:",
+          error
+        );
+
+        setEquipoDetectado(null);
+
         if (error instanceof Error) {
           setErrorEquipo(error.message);
         } else {
@@ -62,25 +84,40 @@ function ReportarEquipo() {
     cargarEquipo();
   }, []);
 
+  // ============================================================
+  // CERRAR SESIÓN
+  // ============================================================
+
   const cerrarSesion = () => {
     localStorage.removeItem("usuario");
     navigate("/login");
   };
 
-  const enviarReporte = async (e: React.FormEvent) => {
+  // ============================================================
+  // ENVIAR REPORTE
+  // ============================================================
+
+  const enviarReporte = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
 
     if (!equipoDetectado) {
-      alert("No se ha detectado un equipo registrado.");
+      alert(
+        "No se ha podido detectar el equipo."
+      );
       return;
     }
 
     if (!prioridad || !descripcion.trim()) {
-      alert("Por favor completa todos los campos.");
+      alert(
+        "Por favor completa todos los campos."
+      );
       return;
     }
 
-    const usuarioGuardado = localStorage.getItem("usuario");
+    const usuarioGuardado =
+      localStorage.getItem("usuario");
 
     if (!usuarioGuardado) {
       alert("No hay una sesión activa.");
@@ -89,16 +126,28 @@ function ReportarEquipo() {
     }
 
     try {
-      const usuario = JSON.parse(usuarioGuardado);
+      const usuario =
+        JSON.parse(usuarioGuardado);
 
       setCargando(true);
 
-      const respuesta = await api.crearReporte({
-        id_equipo: equipoDetectado.id_equipo,
-        id_usuario: Number(usuario.id_usuario),
-        descripcion: descripcion.trim(),
-        prioridad: prioridad as "baja" | "media" | "alta",
-      });
+      const respuesta =
+        await api.crearReporte({
+          id_equipo:
+            equipoDetectado.id_equipo,
+
+          id_usuario:
+            Number(usuario.id_usuario),
+
+          descripcion:
+            descripcion.trim(),
+
+          prioridad:
+            prioridad as
+              | "baja"
+              | "media"
+              | "alta",
+        });
 
       alert(
         `${respuesta.mensaje}\nReporte #${respuesta.id_reporte}`
@@ -113,15 +162,25 @@ function ReportarEquipo() {
       if (error instanceof Error) {
         alert(error.message);
       } else {
-        alert("No fue posible crear el reporte.");
+        alert(
+          "No fue posible crear el reporte."
+        );
       }
     } finally {
       setCargando(false);
     }
   };
 
+  // ============================================================
+  // INTERFAZ
+  // ============================================================
+
   return (
     <div className="report-page">
+
+      {/* ======================================================
+          BARRA SUPERIOR
+      ====================================================== */}
 
       <header className="topbar">
 
@@ -153,13 +212,23 @@ function ReportarEquipo() {
 
       </header>
 
+      {/* ======================================================
+          CONTENIDO
+      ====================================================== */}
+
       <main className="report-content">
+
+        {/* ====================================================
+            TÍTULO
+        ==================================================== */}
 
         <section className="report-title">
 
           <div>
 
-            <h1>Reportar equipo</h1>
+            <h1>
+              Reportar equipo
+            </h1>
 
             <p>
               Registra un problema o novedad
@@ -170,7 +239,13 @@ function ReportarEquipo() {
 
         </section>
 
+        {/* ====================================================
+            FORMULARIO
+        ==================================================== */}
+
         <section className="report-container">
+
+          {/* ENCABEZADO */}
 
           <div className="report-header">
 
@@ -180,11 +255,13 @@ function ReportarEquipo() {
 
             <div>
 
-              <h2>Nuevo reporte</h2>
+              <h2>
+                Nuevo reporte
+              </h2>
 
               <p>
-                Completa la información de la novedad
-                del equipo detectado.
+                Completa la información de la
+                novedad del equipo detectado.
               </p>
 
             </div>
@@ -196,7 +273,13 @@ function ReportarEquipo() {
             onSubmit={enviarReporte}
           >
 
+            {/* =================================================
+                AMBIENTE + EQUIPO
+            ================================================= */}
+
             <div className="form-row">
+
+              {/* AMBIENTE */}
 
               <div className="form-group">
 
@@ -206,14 +289,23 @@ function ReportarEquipo() {
                 </label>
 
                 <div className="input-group">
-                  {cargandoEquipo
-                    ? "Detectando ambiente..."
-                    : equipoDetectado
-                    ? `Ambiente ${equipoDetectado.id_ambiente ?? "No asignado"}`
-                    : "No disponible"}
+
+                  {cargandoEquipo ? (
+                    "Detectando ambiente..."
+                  ) : equipoDetectado ? (
+                    `Ambiente ${
+                      equipoDetectado.id_ambiente ??
+                      "No asignado"
+                    }`
+                  ) : (
+                    "No disponible"
+                  )}
+
                 </div>
 
               </div>
+
+              {/* EQUIPO DETECTADO */}
 
               <div className="form-group">
 
@@ -224,26 +316,25 @@ function ReportarEquipo() {
 
                 <div className="input-group">
 
-                  {cargandoEquipo && (
+                  {cargandoEquipo ? (
+
                     <span>
                       Detectando equipo...
                     </span>
+
+                  ) : equipoDetectado ? (
+
+                    <span>
+                      {equipoDetectado.modelo}
+                    </span>
+
+                  ) : (
+
+                    <span>
+                      Equipo no encontrado
+                    </span>
+
                   )}
-
-                  {!cargandoEquipo &&
-                    equipoDetectado && (
-                      <span>
-                        {equipoDetectado.serial} -{" "}
-                        {equipoDetectado.modelo}
-                      </span>
-                    )}
-
-                  {!cargandoEquipo &&
-                    !equipoDetectado && (
-                      <span>
-                        Equipo no encontrado
-                      </span>
-                    )}
 
                 </div>
 
@@ -251,13 +342,24 @@ function ReportarEquipo() {
 
             </div>
 
+            {/* =================================================
+                ERROR
+            ================================================= */}
+
             {errorEquipo && (
+
               <div className="error-message">
                 {errorEquipo}
               </div>
+
             )}
 
+            {/* =================================================
+                INFORMACIÓN DEL EQUIPO
+            ================================================= */}
+
             {equipoDetectado && (
+
               <div className="form-group">
 
                 <label>
@@ -266,13 +368,24 @@ function ReportarEquipo() {
                 </label>
 
                 <div className="input-group">
-                  Serial: {equipoDetectado.serial}
+
+                  Serial:{" "}
+                  {equipoDetectado.serial}
+
                   {" | "}
-                  Registro: {equipoDetectado.registro_unico}
+
+                  Registro:{" "}
+                  {equipoDetectado.registro_unico}
+
                 </div>
 
               </div>
+
             )}
+
+            {/* =================================================
+                PRIORIDAD
+            ================================================= */}
 
             <div className="form-group">
 
@@ -282,6 +395,8 @@ function ReportarEquipo() {
               </label>
 
               <div className="status-options">
+
+                {/* BAJA */}
 
                 <label
                   className={`status-option ${
@@ -295,9 +410,13 @@ function ReportarEquipo() {
                     type="radio"
                     name="prioridad"
                     value="baja"
-                    checked={prioridad === "baja"}
+                    checked={
+                      prioridad === "baja"
+                    }
                     onChange={(e) =>
-                      setPrioridad(e.target.value)
+                      setPrioridad(
+                        e.target.value
+                      )
                     }
                   />
 
@@ -308,6 +427,8 @@ function ReportarEquipo() {
                   </span>
 
                 </label>
+
+                {/* MEDIA */}
 
                 <label
                   className={`status-option ${
@@ -321,9 +442,13 @@ function ReportarEquipo() {
                     type="radio"
                     name="prioridad"
                     value="media"
-                    checked={prioridad === "media"}
+                    checked={
+                      prioridad === "media"
+                    }
                     onChange={(e) =>
-                      setPrioridad(e.target.value)
+                      setPrioridad(
+                        e.target.value
+                      )
                     }
                   />
 
@@ -334,6 +459,8 @@ function ReportarEquipo() {
                   </span>
 
                 </label>
+
+                {/* ALTA */}
 
                 <label
                   className={`status-option ${
@@ -347,9 +474,13 @@ function ReportarEquipo() {
                     type="radio"
                     name="prioridad"
                     value="alta"
-                    checked={prioridad === "alta"}
+                    checked={
+                      prioridad === "alta"
+                    }
                     onChange={(e) =>
-                      setPrioridad(e.target.value)
+                      setPrioridad(
+                        e.target.value
+                      )
                     }
                   />
 
@@ -365,9 +496,14 @@ function ReportarEquipo() {
 
             </div>
 
+            {/* =================================================
+                DESCRIPCIÓN
+            ================================================= */}
+
             <div className="form-group">
 
               <label htmlFor="descripcion">
+                <FaExclamationTriangle />
                 Descripción del problema
               </label>
 
@@ -375,7 +511,9 @@ function ReportarEquipo() {
                 id="descripcion"
                 value={descripcion}
                 onChange={(e) =>
-                  setDescripcion(e.target.value)
+                  setDescripcion(
+                    e.target.value
+                  )
                 }
                 placeholder="Describe el problema o novedad del equipo..."
                 rows={6}
@@ -383,12 +521,18 @@ function ReportarEquipo() {
 
             </div>
 
+            {/* =================================================
+                BOTONES
+            ================================================= */}
+
             <div className="form-actions">
 
               <button
                 type="button"
                 className="cancel-button"
-                onClick={() => navigate(-1)}
+                onClick={() =>
+                  navigate(-1)
+                }
                 disabled={cargando}
               >
                 Cancelar
@@ -420,10 +564,15 @@ function ReportarEquipo() {
 
       </main>
 
+      {/* ======================================================
+          FOOTER
+      ====================================================== */}
+
       <footer className="admin-footer">
 
         <p>
-          © 2026 DataVentor — Sistema de gestión de equipos
+          © 2026 DataVentor — Sistema de gestión
+          de equipos
         </p>
 
       </footer>

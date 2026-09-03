@@ -1,26 +1,41 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/detalleReporte.css";
+
 import {
   FaHome,
   FaSignOutAlt,
   FaUserGraduate,
   FaClock,
   FaCheckCircle,
-  FaTools} from "react-icons/fa";
+  FaTools,
+} from "react-icons/fa";
+
 import { api } from "../services/api";
 import type { Reporte } from "../services/api";
+
+interface Historial {
+  id_historial: number;
+  id_reporte: number;
+  id_usuario: number;
+  estado: "pendiente" | "en_revision" | "resuelto" | "cerrado";
+  fecha: string;
+  observaciones?: string | null;
+  nombre?: string;
+  apellido?: string;
+  correo?: string;
+}
 
 function DetalleReporte() {
   const navigate = useNavigate();
   const { id } = useParams();
 
   const [reporte, setReporte] = useState<Reporte | null>(null);
+  const [historial, setHistorial] = useState<Historial[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const usuarioGuardado = localStorage.getItem("usuario");
-
   const usuario = usuarioGuardado
     ? JSON.parse(usuarioGuardado)
     : null;
@@ -28,12 +43,16 @@ function DetalleReporte() {
   const rol = usuario?.rol?.toLowerCase();
 
   const rutaInicio =
-    rol === "instructor"
+    rol === "administrador"
+      ? "/dashboard-admin"
+      : rol === "tecnico"
+      ? "/dashboard-tecnico"
+      : rol === "instructor"
       ? "/dashboard-instructor"
       : "/dashboard-aprendiz";
 
   useEffect(() => {
-    const cargarReporte = async () => {
+    const cargarDatos = async () => {
       if (!id) {
         setError("No se encontró el reporte.");
         setCargando(false);
@@ -41,11 +60,16 @@ function DetalleReporte() {
       }
 
       try {
-        const datos = await api.getReporteById(
-          Number(id)
-        );
+        const idReporte = Number(id);
 
-        setReporte(datos);
+        const [datosReporte, datosHistorial] =
+          await Promise.all([
+            api.getReporteById(idReporte),
+            api.getHistorialReporte(idReporte),
+          ]);
+
+        setReporte(datosReporte);
+        setHistorial(datosHistorial);
       } catch (err) {
         const mensaje =
           err instanceof Error
@@ -58,7 +82,7 @@ function DetalleReporte() {
       }
     };
 
-    cargarReporte();
+    cargarDatos();
   }, [id]);
 
   const traducirEstado = (
@@ -128,7 +152,7 @@ function DetalleReporte() {
       "es-CO",
       {
         dateStyle: "medium",
-        timeStyle: "short"
+        timeStyle: "short",
       }
     );
   };
@@ -177,9 +201,7 @@ function DetalleReporte() {
               Inicio
             </button>
 
-            <button
-              onClick={cerrarSesion}
-            >
+            <button onClick={cerrarSesion}>
               <FaSignOutAlt size={18} />
               Cerrar Sesión
             </button>
@@ -198,7 +220,7 @@ function DetalleReporte() {
             <button
               onClick={() => navigate(-1)}
             >
-              Volver a mis reportes
+              Volver
             </button>
           </div>
         </main>
@@ -208,15 +230,12 @@ function DetalleReporte() {
 
   return (
     <div className="detalle-reporte">
-
       <header className="topbar">
-
         <h1>
           Data<span>Ventor</span>
         </h1>
 
         <nav>
-
           <button
             onClick={() =>
               navigate(rutaInicio)
@@ -226,44 +245,41 @@ function DetalleReporte() {
             Inicio
           </button>
 
-          <button
-            onClick={cerrarSesion}
-          >
+          <button onClick={cerrarSesion}>
             <FaSignOutAlt size={18} />
             Cerrar Sesión
           </button>
-
         </nav>
 
         <div className="user">
           <FaUserGraduate size={18} />
+
           <span>
-            {rol === "instructor"
+            {rol === "administrador"
+              ? "Administrador"
+              : rol === "tecnico"
+              ? "Técnico"
+              : rol === "instructor"
               ? "Instructor"
               : "Aprendiz"}
           </span>
         </div>
-
       </header>
 
       <main className="contenido-detalle">
 
         <div className="titulo-detalle">
-
-          <h2>
-            Detalle del reporte
-          </h2>
+          <h2>Detalle del reporte</h2>
 
           <p>
             Información y estado del reporte realizado.
           </p>
-
         </div>
 
         <section className="tarjeta-detalle">
 
+          {/* ENCABEZADO */}
           <div className="encabezado-reporte">
-
             <h3>
               Reporte #{reporte.id_reporte}
             </h3>
@@ -279,13 +295,14 @@ function DetalleReporte() {
                 reporte.estado_reporte
               )}
             </span>
-
           </div>
 
+          {/* INFORMACIÓN */}
           <div className="informacion-reporte">
 
             <div>
               <strong>Equipo:</strong>
+
               <span>
                 {reporte.serial ||
                   "No registrado"}
@@ -294,6 +311,7 @@ function DetalleReporte() {
 
             <div>
               <strong>Registro único:</strong>
+
               <span>
                 {reporte.registro_unico ||
                   "No registrado"}
@@ -302,6 +320,7 @@ function DetalleReporte() {
 
             <div>
               <strong>Modelo:</strong>
+
               <span>
                 {reporte.modelo ||
                   "No registrado"}
@@ -310,6 +329,7 @@ function DetalleReporte() {
 
             <div>
               <strong>Ambiente:</strong>
+
               <span>
                 {reporte.id_ambiente ??
                   "No registrado"}
@@ -318,6 +338,7 @@ function DetalleReporte() {
 
             <div>
               <strong>Reportado:</strong>
+
               <span>
                 {formatearFecha(
                   reporte.fecha_reporte
@@ -327,6 +348,7 @@ function DetalleReporte() {
 
             <div>
               <strong>Actualizado:</strong>
+
               <span>
                 {formatearFecha(
                   reporte.fecha_actualizacion
@@ -336,14 +358,17 @@ function DetalleReporte() {
 
             <div>
               <strong>Usuario:</strong>
+
               <span>
-                {reporte.nombre}{" "}
-                {reporte.apellido}
+                {reporte.nombre || ""}
+                {" "}
+                {reporte.apellido || ""}
               </span>
             </div>
 
             <div>
               <strong>Prioridad:</strong>
+
               <span>
                 {traducirPrioridad(
                   reporte.prioridad
@@ -353,26 +378,20 @@ function DetalleReporte() {
 
           </div>
 
+          {/* DESCRIPCIÓN */}
           <div className="descripcion-detalle">
-
-            <h4>
-              Descripción
-            </h4>
+            <h4>Descripción</h4>
 
             <p>
               {reporte.descripcion}
             </p>
-
           </div>
 
+          {/* ESTADO ACTUAL */}
           <div className="estado-actual">
-
-            <h4>
-              Estado actual
-            </h4>
+            <h4>Estado actual</h4>
 
             <div className="estado-box">
-
               {obtenerIconoEstado(
                 reporte.estado_reporte
               )}
@@ -382,21 +401,75 @@ function DetalleReporte() {
                   reporte.estado_reporte
                 )}
               </strong>
-
             </div>
-
           </div>
 
+          {/* HISTORIAL REAL */}
           <div className="historial">
-
             <h4>
-              Información del reporte
+              Historial del reporte
+            </h4>
+
+            {historial.length === 0 ? (
+              <p>
+                No hay movimientos registrados
+                para este reporte.
+              </p>
+            ) : (
+              <div className="linea-historial">
+
+                {historial.map((evento) => (
+                  <div
+                    className="evento"
+                    key={evento.id_historial}
+                  >
+                    <div>
+                      {obtenerIconoEstado(
+                        evento.estado
+                      )}
+
+                      <strong>
+                        {traducirEstado(
+                          evento.estado
+                        )}
+                      </strong>
+                    </div>
+
+                    <span>
+                      {formatearFecha(
+                        evento.fecha
+                      )}
+                    </span>
+
+                    <span>
+                      Realizado por:{" "}
+                      {evento.nombre ||
+                        "Usuario"}{" "}
+                      {evento.apellido || ""}
+                    </span>
+
+                    {evento.observaciones && (
+                      <span>
+                        Observación:{" "}
+                        {evento.observaciones}
+                      </span>
+                    )}
+                  </div>
+                ))}
+
+              </div>
+            )}
+          </div>
+
+          {/* FECHAS */}
+          <div className="historial">
+            <h4>
+              Información de fechas
             </h4>
 
             <div className="linea-historial">
 
               <div className="evento">
-
                 <strong>
                   Creado
                 </strong>
@@ -406,11 +479,9 @@ function DetalleReporte() {
                     reporte.fecha_reporte
                   )}
                 </span>
-
               </div>
 
               <div className="evento">
-
                 <strong>
                   Última actualización
                 </strong>
@@ -420,11 +491,9 @@ function DetalleReporte() {
                     reporte.fecha_actualizacion
                   )}
                 </span>
-
               </div>
 
               <div className="evento">
-
                 <strong>
                   Cierre
                 </strong>
@@ -434,27 +503,22 @@ function DetalleReporte() {
                     reporte.fecha_cierre
                   )}
                 </span>
-
               </div>
 
             </div>
-
           </div>
 
+          {/* BOTÓN */}
           <div className="acciones-detalle">
-
             <button
               onClick={() => navigate(-1)}
             >
-              Volver a mis reportes
+              Volver
             </button>
-
           </div>
 
         </section>
-
       </main>
-
     </div>
   );
 }

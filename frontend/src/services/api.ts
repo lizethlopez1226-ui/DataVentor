@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "http://127.0.0.1:5001";
 
 export interface Reporte {
   id_reporte?: number;
@@ -69,6 +69,18 @@ export interface LoginResponse {
     telefono?: string;
     rol: string;
   };
+}
+
+export interface HistorialReporte {
+  id_historial: number;
+  id_reporte: number;
+  id_usuario: number;
+  estado: "pendiente" | "en_revision" | "resuelto" | "cerrado";
+  fecha: string;
+  observaciones?: string | null;
+  nombre?: string;
+  apellido?: string;
+  correo?: string;
 }
 
 async function request<T>(
@@ -154,6 +166,8 @@ export const api = {
 
     return request<Reporte[]>(url);
   },
+  
+  
 
   getReporteById: (
     id: number
@@ -193,13 +207,13 @@ export const api = {
     );
   },
 
-  getHistorialReporte: (
-    id: number
-  ) => {
-    return request(
-      `/api/reportes/${id}/historial`
-    );
-  },
+ getHistorialReporte: (
+  id: number
+): Promise<HistorialReporte[]> => {
+  return request<HistorialReporte[]>(
+    `/api/reportes/${id}/historial`
+  );
+},
 
   getEquipos: () => {
     return request("/api/equipos");

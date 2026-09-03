@@ -10,9 +10,7 @@ import CrearReporte from "../pages/CrearReporte";
 import MisReportes from "../pages/MisReportes";
 import MisReportesTecnico from "../pages/MisReportesTecnico";
 import DetalleReporte from "../pages/DetalleReporte";
-import RegistrarEquipo from "../pages/RegistrarEquipo";
-import RegistrarAmbiente from "../pages/RegistrarAmbiente";
-
+ import ReportesAdmin from "../pages/ReportesAdmin";
 
 
 export default function AppRoutes() {
@@ -78,7 +76,10 @@ export default function AppRoutes() {
       <Route path="/registrar-usuario"
       element={<Registro/>}
       />
-
+ 
+      <Route path="/reportes-admin"
+      element={<ReportesAdmin />}
+      />
 
     </Routes>
   );

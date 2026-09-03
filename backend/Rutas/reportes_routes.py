@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
+
 from backend.Servicios.reportes_service import ReportesService
+
 
 reportes_bp = Blueprint(
     "reportes",
@@ -10,6 +12,7 @@ reportes_bp = Blueprint(
 
 @reportes_bp.route("", methods=["GET"])
 def listar_reportes():
+
     try:
         id_usuario = request.args.get(
             "usuario",
@@ -23,6 +26,7 @@ def listar_reportes():
         return jsonify(reportes), 200
 
     except Exception as e:
+
         print(
             "Error al listar reportes:",
             repr(e)
@@ -36,6 +40,7 @@ def listar_reportes():
 
 @reportes_bp.route("", methods=["POST"])
 def guardar_reporte():
+
     data = request.get_json() or {}
 
     id_equipo = data.get("id_equipo")
@@ -68,6 +73,7 @@ def guardar_reporte():
         }), 400
 
     try:
+
         nuevo_id = ReportesService.crear_reporte(
             id_equipo,
             id_usuario,
@@ -81,6 +87,7 @@ def guardar_reporte():
         }), 201
 
     except Exception as e:
+
         print(
             "Error al crear reporte:",
             repr(e)
@@ -97,7 +104,9 @@ def guardar_reporte():
     methods=["GET"]
 )
 def obtener_reporte(id_reporte):
+
     try:
+
         reporte = ReportesService.obtener_reporte_por_id(
             id_reporte
         )
@@ -110,6 +119,7 @@ def obtener_reporte(id_reporte):
         return jsonify(reporte), 200
 
     except Exception as e:
+
         print(
             "Error al consultar reporte:",
             repr(e)
@@ -126,6 +136,7 @@ def obtener_reporte(id_reporte):
     methods=["PUT"]
 )
 def cambiar_estado(id_reporte):
+
     data = request.get_json() or {}
 
     nuevo_estado = data.get("estado")
@@ -149,6 +160,7 @@ def cambiar_estado(id_reporte):
         }), 400
 
     try:
+
         exito = ReportesService.actualizar_estado(
             id_reporte,
             nuevo_estado,
@@ -165,6 +177,7 @@ def cambiar_estado(id_reporte):
         }), 200
 
     except Exception as e:
+
         print(
             "Error al actualizar estado:",
             repr(e)
@@ -181,7 +194,9 @@ def cambiar_estado(id_reporte):
     methods=["GET"]
 )
 def obtener_historial(id_reporte):
+
     try:
+
         historial = ReportesService.obtener_historial_reporte(
             id_reporte
         )
@@ -189,6 +204,7 @@ def obtener_historial(id_reporte):
         return jsonify(historial), 200
 
     except Exception as e:
+
         print(
             "Error al consultar historial:",
             repr(e)
@@ -197,4 +213,4 @@ def obtener_historial(id_reporte):
         return jsonify({
             "mensaje": "Error interno al consultar el historial",
             "error": str(e)
-        }), 500
+        }), 

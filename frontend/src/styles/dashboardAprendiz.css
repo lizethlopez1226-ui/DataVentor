@@ -229,3 +229,145 @@ footer{
     text-align:center;
     padding:20px;
 }
+
+/* FORMULARIOS DEL ADMINISTRADOR */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    color: #22223b;
+    font-size: 1.6rem;
+}
+
+.modal h2 svg {
+    color: #7b2cbf;
+}
+
+.modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 5px;
+}
+
+.modal form input,
+.modal form select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    outline: none;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+    background: white;
+    transition: 0.2s;
+}
+
+.modal form input:focus,
+.modal form select:focus {
+    border-color: #7b2cbf;
+    box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.1);
+}
+
+.modal form input::placeholder {
+    color: #9ca3af;
+}
+
+.modal form button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: #0cc96a;
+
+
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.modal form button:hover {
+    transform: translateY(-1px);
+    opacity: 0.92;
+}
+
+.modal form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal-close:hover {
+    background: #eee;
+    color: #7b2cbf;
+}
+
+@media (max-width: 600px) {
+
+    .modal {
+        max-width: 100%;
+        padding: 25px 20px;
+    }
+
+    .modal h2 {
+        font-size: 1.4rem;
+    }
+
+}

@@ -11,6 +11,71 @@ ambientes_bp = Blueprint(
 
 @ambientes_bp.route(
     "/api/ambientes",
+    methods=["GET"]
+)
+def obtener_ambientes():
+
+    conexion = None
+    cursor = None
+
+    try:
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            """
+            SELECT
+                a.id_ambiente,
+                a.id_sede,
+                a.descripcion,
+                s.descripcion AS sede
+            FROM ambientes a
+            INNER JOIN sedes s
+                ON a.id_sede = s.id_sede
+            ORDER BY a.id_ambiente;
+            """
+        )
+
+        ambientes = cursor.fetchall()
+
+        resultado = []
+
+        for ambiente in ambientes:
+
+            resultado.append({
+                "id_ambiente": ambiente[0],
+                "id_sede": ambiente[1],
+                "descripcion": ambiente[2],
+                "sede": ambiente[3]
+            })
+
+        return jsonify(resultado), 200
+
+    except Exception as error:
+
+        print(
+            "ERROR AL CONSULTAR AMBIENTES:",
+            repr(error),
+            flush=True
+        )
+
+        return jsonify({
+            "mensaje": "No fue posible consultar los ambientes.",
+            "error": str(error)
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()
+
+
+@ambientes_bp.route(
+    "/api/ambientes",
     methods=["POST"]
 )
 def crear_ambiente():
@@ -18,21 +83,28 @@ def crear_ambiente():
     datos = request.get_json()
 
     if not datos:
+
         return jsonify({
-            "mensaje": "No se recibieron datos"
+            "mensaje": "No se recibieron datos."
         }), 400
 
-    nombre = datos.get("nombre")
+    descripcion = datos.get("descripcion")
+
+    if not descripcion:
+        descripcion = datos.get("nombre")
+
     id_sede = datos.get("id_sede")
 
-    if not nombre:
+    if not descripcion:
+
         return jsonify({
-            "mensaje": "El nombre del ambiente es obligatorio"
+            "mensaje": "La descripción del ambiente es obligatoria."
         }), 400
 
     if not id_sede:
+
         return jsonify({
-            "mensaje": "La sede es obligatoria"
+            "mensaje": "La sede es obligatoria."
         }), 400
 
     conexion = None
@@ -55,30 +127,43 @@ def crear_ambiente():
         sede = cursor.fetchone()
 
         if not sede:
+
             return jsonify({
-                "mensaje": "La sede indicada no existe"
+                "mensaje": "La sede indicada no existe."
             }), 404
+
+        cursor.execute(
+            """
+            SELECT COALESCE(MAX(id_ambiente), 0) + 1
+            FROM ambientes;
+            """
+        )
+
+        nuevo_id = cursor.fetchone()[0]
 
         cursor.execute(
             """
             INSERT INTO ambientes
             (
+                id_ambiente,
                 id_sede,
-                nombre
+                descripcion
             )
             VALUES
             (
+                %s,
                 %s,
                 %s
             )
             RETURNING
                 id_ambiente,
                 id_sede,
-                nombre;
+                descripcion;
             """,
             (
+                nuevo_id,
                 id_sede,
-                nombre
+                descripcion
             )
         )
 
@@ -87,11 +172,11 @@ def crear_ambiente():
         conexion.commit()
 
         return jsonify({
-            "mensaje": "Ambiente registrado correctamente",
+            "mensaje": "Ambiente registrado correctamente.",
             "ambiente": {
                 "id_ambiente": ambiente[0],
                 "id_sede": ambiente[1],
-                "nombre": ambiente[2]
+                "descripcion": ambiente[2]
             }
         }), 201
 
