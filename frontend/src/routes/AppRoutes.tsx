@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Login";
-import Registro from "../pages/Registro";
+import RegistrarUsuarios from "../pages/RegistrarUsuarios";
 import DashboardAdmin from "../pages/DashboardAdmin";
 import DashboardAprendiz from "../pages/DashboardAprendiz";
 import DashboardTecnico from "../pages/DashboardTecnico";
@@ -29,7 +29,7 @@ export default function AppRoutes() {
 
       <Route
         path="/registro"
-        element={<Registro />}
+        element={<RegistrarUsuarios />}
       />
 
       <Route
@@ -73,8 +73,9 @@ export default function AppRoutes() {
       element={<DetalleReporte />}
       />
 
-      <Route path="/registrar-usuario"
-      element={<Registro/>}
+      <Route
+      path="/registrar-usuario"
+      element={<RegistrarUsuarios />}
       />
  
       <Route path="/reportes-admin"
