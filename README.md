@@ -57,7 +57,7 @@ El sistema está basado en un modelo entidad-relación que incluye las siguiente
 
 ## Tecnologías Utilizadas
 
-* *Base de datos:* OneCompiler's MySQL
+* *Base de datos: postgres
 * *Backend:* python
 * *Frontend:* HTML5, CSS3 , JavaScript, React
 
