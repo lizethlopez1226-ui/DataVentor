@@ -9,7 +9,8 @@ import {
   FaCheckCircle,
   FaClock,
   FaEye,
-  FaUserCog
+  FaUserCog,
+  FaSignOutAlt
 } from "react-icons/fa";
 
 function DashboardTecnico() {
@@ -17,6 +18,11 @@ function DashboardTecnico() {
 
   const [reportes, setReportes] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuario");
+    navigate("/login");
+  };
 
   const cargarReportes = async () => {
     try {
@@ -90,9 +96,44 @@ function DashboardTecnico() {
           Data<span>Ventor</span>
         </h1>
 
-        <div className="topbar-user">
-          <FaUserCog />
-          <span>Técnico</span>
+        <div
+          className="topbar-user"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1.5rem"
+          }}
+        >
+
+          <button
+            onClick={cerrarSesion}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+              fontSize: "1rem",
+              fontWeight: "600"
+            }}
+          >
+            <FaSignOutAlt />
+            Cerrar Sesión
+          </button>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem"
+            }}
+          >
+            <FaUserCog />
+            <span>Técnico</span>
+          </div>
+
         </div>
 
       </header>

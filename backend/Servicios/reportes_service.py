@@ -5,7 +5,7 @@ from backend.conexion import obtener_conexion
 class ReportesService:
 
     @staticmethod
-    def obtener_todos_reportes():
+    def obtener_todos_reportes(id_usuario=None):
         with obtener_conexion() as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 query = """

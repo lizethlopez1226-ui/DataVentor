@@ -84,7 +84,7 @@ function Login() {
 
       <header className="auth-header">
         <div className="logo">
-          Data<span>Ventor</span>
+          <span>DataVentor</span>
         </div>
       </header>
 
@@ -172,14 +172,6 @@ function Login() {
           >
             {cargando ? "Ingresando..." : "Ingresar"}
           </button>
-
-          <div className="auth-link">
-            ¿No tienes cuenta?
-
-            <Link to="/registro">
-              {" "}Registrarse
-            </Link>
-          </div>
 
         </section>
 
