@@ -568,3 +568,76 @@ SELECT * FROM jornada;
 SELECT * FROM vw_reportes_detalle;
 
 SELECT * FROM vw_equipos_ambiente;
+
+SELECT current_database();
+
+SHOW server_encoding;
+
+SHOW client_encoding;
+
+SELECT 
+    id_sede,
+    descripcion,
+    direccion
+FROM sedes
+LIMIT 5;    
+    
+INSERT INTO sedes (
+    id_sede,
+    descripcion,
+    direccion
+)
+VALUES (
+    1,
+    'Sede calle 52',
+    'Calle 52 # 13-65'
+);
+
+
+
+SELECT 
+    id_ambiente,
+    id_sede,
+    descripcion
+FROM ambientes
+LIMIT 5;    
+
+INSERT INTO ambientes (
+    id_ambiente,
+    id_sede,
+    descripcion
+)
+VALUES (
+    109,
+    1,
+    'Ambiente 109'
+);
+    
+SELECT 
+    id_usuario,
+    nombre,
+    apellido,
+    tipo_documento,
+    documento,
+    correo,
+    rol
+FROM usuarios
+LIMIT 5;
+
+INSERT INTO usuarios (
+    id_usuario,
+    tipo_documento,
+    documento,
+    nombre,
+    apellido,
+    correo,
+    contrasena,
+    telefono,
+    rol
+)
+values
+(1, 'TI', '123456789', 'Karol', 'Rivera', 'karol.r@gmail.com', '123', '3000000000', 'administrador'),
+(2, 'TI', '12345678', 'Sebastian', 'Acosta', 'sebastian.a@gmail.com', '123', '3000000000', 'aprendiz'),
+(3, 'TI', '1234567', 'Santiago', 'Sierra', 'santiago.s@gmail.com', '123', '3000000000', 'tecnico'),
+(4, 'TI', '123456', 'Juan', 'Beltran', 'juan.b@gmail.com', '123', '3000000000', 'instructor'),
+(5, 'TI', '12345', 'Lizeth', 'Lopez', 'lizeth.l@gmail.com', '123', '3000000000', 'tecnico');
